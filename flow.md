@@ -1,422 +1,526 @@
-### Property Finder Application Documentation
+### Comprehensive User Flow and Scenarios for Property Finder System
 
-## Table of Contents
+## 1. User Roles and Permissions Overview
 
-- [Introduction](#introduction)
-- [User Types](#user-types)
-- [API Endpoints Overview](#api-endpoints-overview)
-- [User Flows](#user-flows)
+### User Roles
 
-- [Property Seeker Flows](#property-seeker-flows)
+- **Guest Users**: Unauthenticated visitors with limited access
+- **Normal Users**: Registered users who can browse, bookmark, and review properties
+- **Agents**: Users who can list and manage properties
+- **Administrators**: System administrators with full access
 
-- [Browsing Properties](#browsing-properties)
-- [Searching for Properties](#searching-for-properties)
-- [Viewing Property Details](#viewing-property-details)
-- [Managing Bookmarks](#managing-bookmarks)
-- [Submitting Reviews](#submitting-reviews)
+### Permission Matrix
 
-- [Property Owner/Agent Flows](#property-owneragent-flows)
+| Functionality         | Guest | Normal User | Agent | Admin |
+| --------------------- | ----- | ----------- | ----- | ----- |
+| Browse Properties     | ✅    | ✅          | ✅    | ✅    |
+| View Property Details | ✅    | ✅          | ✅    | ✅    |
+| Search Properties     | ✅    | ✅          | ✅    | ✅    |
+| Create User Account   | ✅    | ❌          | ❌    | ✅    |
+| Bookmark Properties   | ❌    | ✅          | ✅    | ✅    |
+| Write Reviews         | ❌    | ✅          | ❌    | ✅    |
+| Manage Own Profile    | ❌    | ✅          | ✅    | ✅    |
+| List Properties       | ❌    | ❌          | ✅    | ✅    |
+| Manage Own Properties | ❌    | ❌          | ✅    | ✅    |
+| Manage All Properties | ❌    | ❌          | ❌    | ✅    |
+| Manage Users          | ❌    | ❌          | ❌    | ✅    |
+| Manage Locations      | ❌    | ❌          | ❌    | ✅    |
 
-- [Managing Properties](#managing-properties)
-- [Creating New Properties](#creating-new-properties)
-- [Editing Properties](#editing-properties)
-- [Managing Property Images](#managing-property-images)
+## 2. Normal User Journeys
 
-- [User Account Flows](#user-account-flows)
+### 2.1 User Registration and Authentication
 
-- [Profile Management](#profile-management)
-- [Viewing Agent Profiles](#viewing-agent-profiles)
+**Registration Flow:**
 
-- [Location-Based Features](#location-based-features)
-- [Technical Implementation Notes](#technical-implementation-notes)
+1. User accesses the registration page
+2. User provides email, name, phone number, and password
+3. System validates input (email format, password strength)
+4. System checks if email is already registered
 
-## Introduction
+5. If email exists: Error message displayed
+6. If email is new: Account created with USER role
 
-The Property Finder application is a comprehensive platform for property seekers to find their ideal properties and for property owners/agents to list and manage their properties. This documentation outlines the user flows for all features and the API endpoints used throughout the application.
+7. System sends verification email (optional)
+8. User receives success message and is directed to login
 
-## User Types
+**Login Flow:**
 
-The application serves two primary user types:
+1. User enters email and password
+2. System validates credentials
 
-1. **Property Seekers**: Users looking to buy or rent properties
-2. **Property Owners/Agents**: Users who list properties for sale or rent
+3. If invalid: Error message displayed
+4. If valid: User authenticated and session created
 
-## API Endpoints Overview
+5. User redirected to homepage with personalized content
 
-| Feature Area    | Endpoints                                                                                                | Description                     |
-| --------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| Properties      | `/api/properties`, `/api/properties/{id}`, `/api/properties/search`, `/api/properties/byOwner/{ownerId}` | Core property listing endpoints |
-| Property Images | `/api/property-images/property/{propertyId}`, `/api/property-images/{id}/set-primary`                    | Property image management       |
-| Bookmarks       | `/api/bookmarks/user/{userId}`, `/api/bookmarks/check/{userId}/{propertyId}`                             | User bookmarks functionality    |
-| Reviews         | `/api/reviews/property/{propertyId}`, `/api/reviews/property/{propertyId}/stats`                         | Property review system          |
-| Locations       | `/api/locations`, `/api/locations/type/{type}`, `/api/locations/search`                                  | Location browsing and filtering |
-| Users           | `/api/users/{id}`                                                                                        | User profile management         |
+**Password Recovery:**
 
-## User Flows
+1. User requests password reset via "Forgot Password"
+2. System sends reset link to registered email
+3. User creates new password
+4. System confirms password change
 
-### Property Seeker Flows
+### 2.2 Property Search and Browsing
 
-#### Browsing Properties
+**Basic Search Flow:**
 
-**Home Page to Property Listings**
+1. User enters search criteria (location, price range, property type)
+2. System queries properties matching criteria (`GET /api/properties/search`)
+3. Results displayed with pagination
+4. Empty results show appropriate message and search refinement suggestions
 
-1. **Access**: Navigate to the home page (`/`)
-2. **Actions**:
+**Advanced Filtering:**
 
-3. Click "View All Properties" button
-4. Click on a featured property card
+1. User applies additional filters (bedrooms, bathrooms, amenities)
+2. System refines search results in real-time
+3. User can sort results (price, newest, popularity)
 
-5. **Endpoints Used**:
+**Location-Based Search:**
 
-6. `GET /api/properties` (to fetch featured properties on home page)
-7. `GET /api/properties` (to fetch all properties on the listing page)
+1. User selects location from dropdown or map
+2. System fetches locations (`GET /api/locations` or `/api/locations/type/{type}`)
+3. System displays properties in selected location
+4. User can navigate to sub-locations (neighborhoods within a city)
 
-**Browsing Property Listings**
+### 2.3 Property Viewing and Details
 
-1. **Access**: Navigate to the properties page (`/properties`)
-2. **Actions**:
+**Property Detail Flow:**
 
-3. Scroll through property listings
-4. Use pagination to view more properties
-5. Sort properties by price or newest
+1. User selects property from search results
+2. System fetches property details (`GET /api/properties/{id}`)
+3. System fetches property images (`GET /api/property-images/property/{propertyId}`)
+4. System fetches property reviews (`GET /api/reviews/property/{propertyId}`)
+5. System checks if property is bookmarked by user (`GET /api/bookmarks/check/{userId}/{propertyId}`)
+6. System displays comprehensive property information
+7. User can view image gallery, property specifications, location on map
 
-6. **Endpoints Used**:
+**Similar Properties:**
 
-7. `GET /api/properties` (with pagination parameters)
+1. System suggests similar properties based on location, price range, and type
+2. User can navigate to suggested properties
 
-#### Searching for Properties
+### 2.4 Bookmarking Properties
 
-**Basic Search**
+**Add Bookmark Flow:**
 
-1. **Access**: Use the search form on the home page or property listings page
-2. **Actions**:
+1. User clicks "Bookmark" button on property
+2. System checks if already bookmarked
 
-3. Enter location
-4. Select property type
-5. Click "Search" button
+3. If already bookmarked: No action or remove bookmark
+4. If not bookmarked: Create bookmark (`POST /api/bookmarks`)
 
-6. **Endpoints Used**:
+5. UI updates to show bookmarked status
+6. Success message displayed
 
-7. `GET /api/properties/search` (with query parameters)
+**View Bookmarks Flow:**
 
-**Advanced Search**
+1. User navigates to "My Bookmarks" section
+2. System fetches user's bookmarks (`GET /api/bookmarks/user/{userId}`)
+3. System displays bookmarked properties with key information
+4. User can filter or sort bookmarks
 
-1. **Access**: Click "Show Filters" on the property listings page
-2. **Actions**:
+**Remove Bookmark Flow:**
 
-3. Set price range
-4. Select number of bedrooms
-5. Choose listing type (Sale/Rent)
-6. Apply filters
+1. User clicks "Remove" on a bookmarked property
+2. System removes bookmark (`DELETE /api/bookmarks/user/{userId}/property/{propertyId}`)
+3. UI updates to reflect removal
+4. Success message displayed
 
-7. **Endpoints Used**:
+### 2.5 Writing and Managing Reviews
 
-8. `GET /api/properties/search` (with detailed query parameters)
-9. `GET /api/locations` (to populate location dropdown)
+**Submit Review Flow:**
 
-**Location-Based Search**
+1. User navigates to property details
+2. User clicks "Write Review" button
+3. System checks if user has already reviewed this property
 
-1. **Access**: Navigate to the locations page (`/locations`)
-2. **Actions**:
+4. If already reviewed: Edit existing review
+5. If not reviewed: Show review form
 
-3. Browse locations
-4. Filter by location type (City, Neighborhood, etc.)
-5. Click on a location card
+6. User submits rating and comment
+7. System validates input (rating range, comment length)
+8. System creates review (`POST /api/reviews`)
+9. Property page updates with new review
+10. Success message displayed
 
-6. **Endpoints Used**:
+**Edit Review Flow:**
 
-7. `GET /api/locations` (to fetch all locations)
-8. `GET /api/locations/type/{type}` (when filtering by type)
-9. `GET /api/properties/search?location={locationName}` (when selecting a location)
+1. User navigates to their review
+2. User clicks "Edit" button
+3. System displays form with current review data
+4. User modifies rating or comment
+5. System updates review (`PUT /api/reviews/{id}`)
+6. Updated review displayed
+7. Success message shown
 
-#### Viewing Property Details
+**Delete Review Flow:**
 
-**Property Detail Page**
+1. User selects "Delete" on their review
+2. System prompts for confirmation
+3. User confirms deletion
+4. System removes review (`DELETE /api/reviews/{id}`)
+5. Review removed from property page
+6. Success message displayed
 
-1. **Access**: Click on any property card
-2. **Actions**:
+### 2.6 User Profile Management
 
-3. View property details, images, and features
-4. Check property location
-5. View owner/agent information
-6. Read reviews
+**View Profile Flow:**
 
-7. **Endpoints Used**:
+1. User navigates to profile section
+2. System fetches user data (`GET /api/users/{id}`)
+3. System displays user information and activity
 
-8. `GET /api/properties/{id}` (to fetch property details)
-9. `GET /api/property-images/property/{propertyId}` (to fetch property images)
-10. `GET /api/reviews/property/{propertyId}` (to fetch property reviews)
-11. `GET /api/reviews/property/{propertyId}/stats` (to fetch review statistics)
-12. `GET /api/bookmarks/check/{userId}/{propertyId}` (to check if property is bookmarked)
+**Edit Profile Flow:**
 
-**Image Gallery**
+1. User selects "Edit Profile"
+2. System displays form with current user data
+3. User modifies information (name, phone, etc.)
+4. System validates input
+5. System updates user data (`PUT /api/users/{id}`)
+6. Updated profile displayed
+7. Success message shown
 
-1. **Access**: Click on any image in the property detail page
-2. **Actions**:
+**Change Password Flow:**
 
-3. View full-screen image gallery
-4. Navigate between images
+1. User selects "Change Password"
+2. User enters current password and new password
+3. System validates input (password strength, match)
+4. System updates password
+5. Success message displayed
 
-5. **Endpoints Used**: No additional endpoints (uses already loaded images)
+## 3. Agent Journeys
 
-**Contact Agent**
+### 3.1 Agent Registration and Verification
 
-1. **Access**: Click "Contact Agent" button on property detail page
-2. **Actions**:
+**Agent Registration Flow:**
 
-3. Fill out contact form
-4. Submit inquiry
+1. User registers as normal user
+2. User requests agent status (may require additional information)
+3. Administrator reviews and approves agent status
+4. User role updated to AGENT
+5. Agent receives notification of approval
 
-5. **Endpoints Used**:
+### 3.2 Property Management
 
-6. Would use a hypothetical `POST /api/inquiries` endpoint in a full implementation
+**Property Listing Flow:**
 
-#### Managing Bookmarks
+1. Agent navigates to "My Properties" section
+2. Agent selects "Add New Property"
+3. System displays property creation form
+4. Agent enters property details (title, description, price, location, etc.)
+5. System validates input
+6. System creates property (`POST /api/properties`)
+7. Success message displayed
+8. Agent directed to add images
 
-**Adding Bookmarks**
+**Property Editing Flow:**
 
-1. **Access**: Click the bookmark icon on any property card or detail page
-2. **Actions**:
+1. Agent navigates to "My Properties"
+2. System fetches agent's properties (`GET /api/properties/byOwner/{ownerId}`)
+3. Agent selects property to edit
+4. System displays form with current property data
+5. Agent modifies information
+6. System validates input
+7. System updates property (`PUT /api/properties/{id}`)
+8. Success message displayed
 
-3. Toggle bookmark status
+**Property Deletion Flow:**
 
-4. **Endpoints Used**:
+1. Agent selects "Delete" on a property
+2. System prompts for confirmation
+3. Agent confirms deletion
+4. System removes property and related data (`DELETE /api/properties/{id}`)
+5. Property removed from listings
+6. Success message displayed
 
-5. `POST /api/bookmarks` (when adding a bookmark)
-6. `DELETE /api/bookmarks/user/{userId}/property/{propertyId}` (when removing a bookmark)
+### 3.3 Property Image Management
 
-**Viewing Bookmarks**
+**Add Images Flow:**
 
-1. **Access**: Click the bookmark icon in the header or select "Bookmarks" from user menu
-2. **Actions**:
+1. Agent navigates to property image section
+2. Agent uploads images or provides image URLs
+3. Agent adds descriptions and sets primary image
+4. System validates input (file size, format)
+5. System adds images (`POST /api/property-images`)
+6. Images displayed in property gallery
+7. Success message shown
 
-3. View all bookmarked properties
-4. Remove bookmarks
-5. Click on properties to view details
+**Edit Images Flow:**
 
-6. **Endpoints Used**:
+1. Agent selects image to edit
+2. Agent modifies description or primary status
+3. System updates image (`PUT /api/property-images/{id}`)
+4. Updated image information displayed
+5. Success message shown
 
-7. `GET /api/bookmarks/user/{userId}` (to fetch user's bookmarks)
-8. `DELETE /api/bookmarks/user/{userId}/property/{propertyId}` (when removing a bookmark)
+**Set Primary Image Flow:**
 
-#### Submitting Reviews
+1. Agent selects "Set as Primary" on an image
+2. System updates image as primary (`PUT /api/property-images/{id}/set-primary`)
+3. UI updates to show new primary image
+4. Success message displayed
 
-**Adding a Review**
+**Delete Images Flow:**
 
-1. **Access**: Navigate to a property detail page (`/properties/{id}`) and click "Write a Review"
-2. **Actions**:
+1. Agent selects "Delete" on an image
+2. System prompts for confirmation
+3. Agent confirms deletion
+4. System removes image (`DELETE /api/property-images/{id}`)
+5. Image removed from gallery
+6. Success message displayed
 
-3. Rate the property (1-5 stars)
-4. Write review comment
-5. Submit review
+### 3.4 Handling User Inquiries (Conceptual)
 
-6. **Endpoints Used**:
+**Receive Inquiry Flow:**
 
-7. `POST /api/reviews` (to submit a new review)
+1. User sends inquiry about property
+2. System notifies agent of new inquiry
+3. Agent views inquiry details
 
-**Editing a Review**
+**Respond to Inquiry Flow:**
 
-1. **Access**: Navigate to a property where you've already submitted a review
-2. **Actions**:
+1. Agent navigates to inquiries section
+2. Agent selects inquiry to respond to
+3. Agent writes and sends response
+4. System notifies user of response
+5. Inquiry marked as responded
 
-3. Click edit button on your review
-4. Update rating or comment
-5. Save changes
+### 3.5 Agent Profile Management
 
-6. **Endpoints Used**:
+**Agent Profile Flow:**
 
-7. `PUT /api/reviews/{id}` (to update an existing review)
+1. Agent navigates to profile section
+2. System displays agent profile with professional information
+3. Agent can edit profile details, specializations, and contact information
+4. System updates agent profile
+5. Updated profile displayed to users viewing agent's properties
 
-### Property Owner/Agent Flows
+## 4. Administrator Journeys
 
-#### Managing Properties
+### 4.1 User Management
 
-**Viewing My Properties**
+**View Users Flow:**
 
-1. **Access**: Click "My Properties" in the user menu
-2. **Actions**:
+1. Admin navigates to user management section
+2. System fetches all users (`GET /api/users`)
+3. Admin can search, filter, and sort users
+4. Admin can view detailed user information
 
-3. View all properties you've listed
-4. Filter by listing type (Sale/Rent)
-5. Manage individual properties
+**Edit User Flow:**
 
-6. **Endpoints Used**:
+1. Admin selects user to edit
+2. Admin modifies user information (including role)
+3. System updates user (`PUT /api/users/{id}`)
+4. Updated user information displayed
 
-7. `GET /api/properties/byOwner/{ownerId}` (to fetch owner's properties)
+**Delete User Flow:**
 
-**Property Management Actions**
+1. Admin selects "Delete" on a user
+2. System prompts for confirmation
+3. Admin confirms deletion
+4. System removes user (`DELETE /api/users/{id}`)
+5. User removed from system
+6. Success message displayed
 
-1. **Access**: Click the menu icon on any property in "My Properties"
-2. **Actions**:
+### 4.2 Location Management
 
-3. View property
-4. Edit property
-5. Manage images
-6. Delete property
+**Add Location Flow:**
 
-7. **Endpoints Used**:
+1. Admin navigates to location management
+2. Admin selects "Add Location"
+3. Admin enters location details (name, type, coordinates)
+4. System validates input
+5. System creates location (`POST /api/locations`)
+6. New location available in location hierarchy
+7. Success message displayed
 
-8. `DELETE /api/properties/{id}` (when deleting a property)
+**Edit Location Flow:**
 
-#### Creating New Properties
+1. Admin selects location to edit
+2. Admin modifies location information
+3. System updates location (`PUT /api/locations/{id}`)
+4. Updated location information displayed
+5. Success message shown
 
-**Adding a New Property**
+**Move Location Flow:**
 
-1. **Access**: Click "Add New Property" button on "My Properties" page
-2. **Actions**:
+1. Admin selects "Move" on a location
+2. Admin selects new parent location
+3. System moves location (`PUT /api/locations/{id}/move/{newParentId}`)
+4. Location hierarchy updated
+5. Success message displayed
 
-3. Fill out property details form
-4. Select property type and listing type
-5. Set price and features
-6. Submit the form
+**Delete Location Flow:**
 
-7. **Endpoints Used**:
+1. Admin selects "Delete" on a location
+2. System prompts for confirmation
+3. Admin confirms deletion
+4. System removes location (`DELETE /api/locations/{id}`)
+5. Location removed from hierarchy
+6. Success message displayed
 
-8. `POST /api/properties` (to create a new property)
+### 4.3 Property Oversight
 
-#### Editing Properties
+**Review Properties Flow:**
 
-**Updating Property Details**
+1. Admin navigates to property management
+2. System fetches all properties
+3. Admin can search, filter, and sort properties
+4. Admin can view detailed property information
 
-1. **Access**: Click "Edit" on a property in "My Properties" page
-2. **Actions**:
+**Moderate Reviews Flow:**
 
-3. Modify property details
-4. Update price, features, or description
-5. Save changes
+1. Admin navigates to review management
+2. System fetches all reviews
+3. Admin can filter reviews by property, user, or rating
+4. Admin can edit or delete inappropriate reviews
 
-6. **Endpoints Used**:
+## 5. Error Handling Scenarios
 
-7. `GET /api/properties/{id}` (to fetch current property details)
-8. `PUT /api/properties/{id}` (to update the property)
+### 5.1 Authentication Errors
 
-#### Managing Property Images
+**Invalid Credentials:**
 
-**Adding and Managing Images**
+1. User enters incorrect email or password
+2. System displays "Invalid email or password" message
+3. Login form remains with cleared password field
+4. User can retry or reset password
 
-1. **Access**: Click "Manage Images" on a property in "My Properties" page
-2. **Actions**:
+**Unauthorized Access:**
 
-3. View current images
-4. Add new images
-5. Set primary image
-6. Delete images
-7. Edit image descriptions
+1. User attempts to access restricted resource
+2. System returns 401 Unauthorized or 403 Forbidden
+3. User redirected to login page or access denied page
+4. Error message explains reason for denial
 
-8. **Endpoints Used**:
+### 5.2 Resource Not Found
 
-9. `GET /api/property-images/property/{propertyId}` (to fetch property images)
-10. `POST /api/property-images` (to add a new image)
-11. `PUT /api/property-images/{id}` (to update image details)
-12. `PUT /api/property-images/{id}/set-primary` (to set an image as primary)
-13. `DELETE /api/property-images/{id}` (to delete an image)
+**Property Not Found:**
 
-### User Account Flows
+1. User accesses invalid property ID
+2. System returns 404 Not Found
+3. User shown "Property not found" page with search suggestions
+4. User can navigate back to property listings
 
-#### Profile Management
+**User Not Found:**
 
-**Viewing and Editing Profile**
+1. System attempts to fetch non-existent user
+2. System returns 404 Not Found
+3. Appropriate error message displayed
+4. User directed to relevant section
 
-1. **Access**: Click "Profile" in the user menu
-2. **Actions**:
+### 5.3 Validation Errors
 
-3. View profile information
-4. Edit personal details
-5. Change password
-6. Update notification preferences
+**Invalid Property Data:**
 
-7. **Endpoints Used**:
+1. Agent submits property with missing required fields
+2. System validates input and returns 400 Bad Request
+3. Form highlights invalid fields with specific error messages
+4. Agent can correct errors and resubmit
 
-8. `GET /api/users/{id}` (to fetch user profile)
-9. `PUT /api/users/{id}` (to update user profile)
+**Invalid Review Data:**
 
-#### Viewing Agent Profiles
+1. User submits review with invalid rating or empty comment
+2. System validates input and returns 400 Bad Request
+3. Form highlights invalid fields with specific error messages
+4. User can correct errors and resubmit
 
-**Agent Profile Page**
+### 5.4 Conflict Errors
 
-1. **Access**: Click on an agent/owner name on any property detail page
-2. **Actions**:
+**Duplicate Email:**
 
-3. View agent information and bio
-4. See agent's listed properties
-5. Contact the agent
+1. User attempts to register with existing email
+2. System returns 409 Conflict
+3. Registration form shows "Email already in use" message
+4. User can try different email or recover password
 
-6. **Endpoints Used**:
+**Duplicate Review:**
 
-7. `GET /api/users/{id}` (to fetch agent profile)
-8. `GET /api/properties/byOwner/{ownerId}` (to fetch agent's properties)
+1. User attempts to submit second review for same property
+2. System returns 409 Conflict
+3. User shown message that they've already reviewed this property
+4. User directed to edit existing review
 
-## Location-Based Features
+## 6. Security and Permission Enforcement
 
-**Browsing Locations**
+### 6.1 Authentication Enforcement
 
-1. **Access**: Click "Locations" in the main navigation
-2. **Actions**:
+- All endpoints except public browsing require authentication
+- JWT or session-based authentication validates user identity
+- Tokens expire after set period for security
+- Refresh token mechanism for seamless experience
 
-3. Browse all locations
-4. Filter by location type
-5. Search for specific locations
-6. Click on a location to view properties
+### 6.2 Authorization Enforcement
 
-7. **Endpoints Used**:
+- Role-based access control (RBAC) enforces permissions
+- Endpoints check user role before processing requests
+- Users can only modify their own data (except admins)
+- Agents can only manage their own properties
 
-8. `GET /api/locations` (to fetch all locations)
-9. `GET /api/locations/type/{type}` (when filtering by type)
-10. `GET /api/locations/search?name={name}` (when searching locations)
-11. `GET /api/properties/search?location={locationName}` (when selecting a location)
+### 6.3 Data Validation and Sanitization
 
-## Technical Implementation Notes
+- All user inputs validated on both client and server
+- Input sanitization prevents XSS and injection attacks
+- File uploads validated for type, size, and content
+- Rate limiting prevents abuse of API endpoints
 
-### API Integration with React Query
+## 7. Cross-Functional Flows
 
-For each endpoint, the application uses React Query to manage data fetching, caching, and state. Here's how the integration works:
+### 7.1 Property Lifecycle
 
-**Fetching Data Example**:
+1. Agent creates property listing
+2. Users view and bookmark property
+3. Users submit reviews
+4. Agent updates property details as needed
+5. Property may be marked as sold/rented
+6. Property may eventually be removed from system
 
-```javascriptreact
-// Example for fetching properties
-const { data: properties, isLoading, error } = useQuery({
-  queryKey: ['properties', searchParams],
-  queryFn: () => fetch(`/api/properties/search?${searchParams}`).then(res => res.json())
-});
-```
+### 7.2 User Interaction Flow
 
-**Mutation Example**:
+1. User searches for properties
+2. User views property details
+3. User bookmarks interesting properties
+4. User contacts agent about property (conceptual)
+5. User may visit property in person (outside system)
+6. User may submit review after experience
+7. User may remove bookmark if no longer interested
 
-```javascriptreact
-// Example for creating a property
-const createProperty = useMutation({
-  mutationFn: (data) => {
-    return fetch('/api/properties', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    }).then(res => res.json());
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ['properties'] });
-    navigate("/my-properties");
-  }
-});
-```
+### 7.3 Location Hierarchy Navigation
 
-### Error Handling
+1. User starts with broad location (city)
+2. User narrows to specific neighborhood
+3. User views properties in selected area
+4. User may compare properties across neighborhoods
+5. User may expand search to nearby areas
 
-The application implements error handling for API requests:
+## 8. Mobile-Specific Considerations
 
-1. **Network Errors**: Displayed when the API is unreachable
-2. **404 Errors**: Shown when a resource is not found
-3. **Validation Errors**: Form-specific errors displayed inline
-4. **Server Errors**: General error messages for unexpected issues
+### 8.1 Location Services
 
-### Authentication Flow
+- Mobile app requests location permission
+- System suggests nearby properties based on user location
+- Map view shows properties relative to user position
+- Directions to property available from current location
 
-While not fully implemented in the current version, the authentication flow would work as follows:
+### 8.2 Offline Capabilities
 
-1. **Login**: User enters credentials, receives JWT token
-2. **Protected Routes**: Routes like `/my-properties` require authentication
-3. **Token Storage**: JWT stored in localStorage or secure cookie
-4. **Token Refresh**: Automatic refresh of tokens before expiry
-5. **Logout**: Removes token and redirects to home page
+- Bookmarked properties available offline
+- Search history saved for offline access
+- Changes queued when offline and synced when online
+- Notification when connection restored
 
----
+## 9. Analytics and Reporting (Conceptual)
+
+### 9.1 User Analytics
+
+- Track user search patterns
+- Monitor popular properties and locations
+- Analyze user engagement metrics
+- Identify conversion points (views to inquiries)
+
+### 9.2 Agent Performance
+
+- Track property listing views
+- Monitor inquiry response rates
+- Analyze property listing quality
+- Provide insights for improvement
