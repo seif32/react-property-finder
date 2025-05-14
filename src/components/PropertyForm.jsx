@@ -1,20 +1,7 @@
 "use client";
+
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import {
-  Box,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Grid,
-  Typography,
-  InputAdornment,
-  Paper,
-  Divider,
-} from "@mui/material";
 import { listingTypes, locations, propertyTypes } from "../data/dummyData";
 
 function PropertyForm({ property = null, onSubmit }) {
@@ -71,200 +58,284 @@ function PropertyForm({ property = null, onSubmit }) {
   };
 
   return (
-    <Paper elevation={2} sx={{ p: 4 }}>
+    <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
       <form onSubmit={handleSubmit(handleFormSubmit)}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Typography variant="h6" gutterBottom>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="md:col-span-2">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Basic Information
-            </Typography>
-          </Grid>
+            </h2>
+          </div>
 
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Property Title"
+          <div className="md:col-span-2">
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Property Title
+            </label>
+            <input
+              id="title"
+              type="text"
+              className={`w-full px-4 py-2 border ${
+                errors.title ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
               {...register("title", { required: "Title is required" })}
-              error={!!errors.title}
-              helperText={errors.title?.message}
             />
-          </Grid>
+            {errors.title && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.title.message}
+              </p>
+            )}
+          </div>
 
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Description"
-              multiline
-              rows={4}
+          <div className="md:col-span-2">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              rows="4"
+              className={`w-full px-4 py-2 border ${
+                errors.description ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
               {...register("description", {
                 required: "Description is required",
               })}
-              error={!!errors.description}
-              helperText={errors.description?.message}
             />
-          </Grid>
+            {errors.description && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.description.message}
+              </p>
+            )}
+          </div>
 
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth error={!!errors.propertyType}>
-              <InputLabel id="property-type-label">Property Type</InputLabel>
-              <Select
-                labelId="property-type-label"
-                label="Property Type"
-                {...register("propertyType", {
-                  required: "Property type is required",
-                })}
-                defaultValue={isEditing ? property.propertyType : ""}
-              >
-                {propertyTypes.map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {type}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.propertyType && (
-                <Typography variant="caption" color="error">
-                  {errors.propertyType.message}
-                </Typography>
-              )}
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth error={!!errors.listingType}>
-              <InputLabel id="listing-type-label">Listing Type</InputLabel>
-              <Select
-                labelId="listing-type-label"
-                label="Listing Type"
-                {...register("listingType", {
-                  required: "Listing type is required",
-                })}
-                defaultValue={isEditing ? property.listingType : ""}
-              >
-                {listingTypes.map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {type}
-                  </MenuItem>
-                ))}
-              </Select>
-              {errors.listingType && (
-                <Typography variant="caption" color="error">
-                  {errors.listingType.message}
-                </Typography>
-              )}
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="h6" gutterBottom>
-              Location & Details
-            </Typography>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth error={!!errors.location}>
-              <InputLabel id="location-label">Location</InputLabel>
-              <Select
-                labelId="location-label"
-                label="Location"
-                {...register("location", { required: "Location is required" })}
-                defaultValue={isEditing ? property.location : ""}
-              >
-                {locations.map((location) => (
-                  <MenuItem key={location.id} value={location.name}>
-                    {location.name}
-                  </MenuItem>
-                ))}
-                {locations.flatMap((location) =>
-                  location.subLocations.map((subLocation) => (
-                    <MenuItem key={subLocation.id} value={subLocation.name}>
-                      {subLocation.name} ({location.name})
-                    </MenuItem>
-                  ))
-                )}
-              </Select>
-              {errors.location && (
-                <Typography variant="caption" color="error">
-                  {errors.location.message}
-                </Typography>
-              )}
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Price"
-              type="number"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">$</InputAdornment>
-                ),
-              }}
-              {...register("price", {
-                required: "Price is required",
-                min: { value: 1, message: "Price must be greater than 0" },
+          <div>
+            <label
+              htmlFor="propertyType"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Property Type
+            </label>
+            <select
+              id="propertyType"
+              className={`w-full px-4 py-2 border ${
+                errors.propertyType ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white`}
+              {...register("propertyType", {
+                required: "Property type is required",
               })}
-              error={!!errors.price}
-              helperText={errors.price?.message}
-            />
-          </Grid>
+            >
+              <option value="">Select Property Type</option>
+              {propertyTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            {errors.propertyType && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.propertyType.message}
+              </p>
+            )}
+          </div>
 
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label="Bedrooms"
+          <div>
+            <label
+              htmlFor="listingType"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Listing Type
+            </label>
+            <select
+              id="listingType"
+              className={`w-full px-4 py-2 border ${
+                errors.listingType ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white`}
+              {...register("listingType", {
+                required: "Listing type is required",
+              })}
+            >
+              <option value="">Select Listing Type</option>
+              {listingTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+            {errors.listingType && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.listingType.message}
+              </p>
+            )}
+          </div>
+
+          <div className="md:col-span-2">
+            <div className="border-t border-gray-200 my-6" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+              Location & Details
+            </h2>
+          </div>
+
+          <div>
+            <label
+              htmlFor="location"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Location
+            </label>
+            <select
+              id="location"
+              className={`w-full px-4 py-2 border ${
+                errors.location ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:ring-2 focus:ring-black bg-white`}
+              {...register("location", { required: "Location is required" })}
+            >
+              <option value="">Select Location</option>
+              {locations.map((location) => (
+                <option key={location.id} value={location.name}>
+                  {location.name}
+                </option>
+              ))}
+              {locations.flatMap((location) =>
+                location.subLocations.map((subLocation) => (
+                  <option key={subLocation.id} value={subLocation.name}>
+                    {subLocation.name} ({location.name})
+                  </option>
+                ))
+              )}
+            </select>
+            {errors.location && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.location.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="price"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Price
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <span className="text-gray-500">$</span>
+              </div>
+              <input
+                id="price"
+                type="number"
+                className={`w-full pl-8 pr-4 py-2 border ${
+                  errors.price ? "border-red-500" : "border-gray-300"
+                } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
+                {...register("price", {
+                  required: "Price is required",
+                  min: { value: 1, message: "Price must be greater than 0" },
+                })}
+              />
+            </div>
+            {errors.price && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.price.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label
+              htmlFor="bedrooms"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Bedrooms
+            </label>
+            <input
+              id="bedrooms"
               type="number"
+              className={`w-full px-4 py-2 border ${
+                errors.bedrooms ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
               {...register("bedrooms", {
                 required: "Number of bedrooms is required",
                 min: { value: 0, message: "Cannot be negative" },
               })}
-              error={!!errors.bedrooms}
-              helperText={errors.bedrooms?.message}
             />
-          </Grid>
+            {errors.bedrooms && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.bedrooms.message}
+              </p>
+            )}
+          </div>
 
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label="Bathrooms"
+          <div>
+            <label
+              htmlFor="bathrooms"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Bathrooms
+            </label>
+            <input
+              id="bathrooms"
               type="number"
+              className={`w-full px-4 py-2 border ${
+                errors.bathrooms ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
               {...register("bathrooms", {
                 required: "Number of bathrooms is required",
                 min: { value: 0, message: "Cannot be negative" },
               })}
-              error={!!errors.bathrooms}
-              helperText={errors.bathrooms?.message}
             />
-          </Grid>
+            {errors.bathrooms && (
+              <p className="mt-1 text-sm text-red-500">
+                {errors.bathrooms.message}
+              </p>
+            )}
+          </div>
 
-          <Grid item xs={12} sm={4}>
-            <TextField
-              fullWidth
-              label="Area (m²)"
+          <div>
+            <label
+              htmlFor="area"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Area (m²)
+            </label>
+            <input
+              id="area"
               type="number"
+              className={`w-full px-4 py-2 border ${
+                errors.area ? "border-red-500" : "border-gray-300"
+              } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
               {...register("area", {
                 required: "Area is required",
                 min: { value: 1, message: "Area must be greater than 0" },
               })}
-              error={!!errors.area}
-              helperText={errors.area?.message}
             />
-          </Grid>
+            {errors.area && (
+              <p className="mt-1 text-sm text-red-500">{errors.area.message}</p>
+            )}
+          </div>
 
-          <Grid item xs={12} sx={{ mt: 2 }}>
-            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
-              <Button variant="outlined" onClick={() => navigate(-1)}>
-                Cancel
-              </Button>
-              <Button type="submit" variant="contained" color="primary">
-                {isEditing ? "Update Property" : "Create Property"}
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
+          <div className="md:col-span-2 flex justify-end space-x-4 mt-6">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+            >
+              {isEditing ? "Update Property" : "Create Property"}
+            </button>
+          </div>
+        </div>
       </form>
-    </Paper>
+    </div>
   );
 }
 

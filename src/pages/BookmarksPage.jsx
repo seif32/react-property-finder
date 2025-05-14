@@ -1,12 +1,6 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import {
-  Container,
-  Typography,
-  Grid,
-  Box,
-  Button,
-  Divider,
-} from "@mui/material";
 import { Link } from "react-router-dom";
 import { currentUser, properties } from "../data/dummyData";
 import PropertyCard from "../components/PropertyCard";
@@ -33,48 +27,43 @@ function BookmarksPage() {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 8, textAlign: "center" }}>
-        <Typography variant="h5">Loading your bookmarks...</Typography>
-      </Container>
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h1 className="text-2xl font-bold">Loading your bookmarks...</h1>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-4">
         Your Bookmarked Properties
-      </Typography>
-      <Divider sx={{ mb: 4 }} />
+      </h1>
+      <div className="border-b border-gray-200 mb-8" />
 
       {bookmarkedProperties.length > 0 ? (
-        <Grid container spacing={3}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {bookmarkedProperties.map((property) => (
-            <Grid item key={property.id} xs={12} sm={6} md={4}>
-              <PropertyCard property={property} />
-            </Grid>
+            <PropertyCard key={property.id} property={property} />
           ))}
-        </Grid>
+        </div>
       ) : (
-        <Box sx={{ textAlign: "center", py: 8 }}>
-          <Typography variant="h5" gutterBottom>
+        <div className="text-center py-16">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-3">
             You haven't bookmarked any properties yet
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          </h2>
+          <p className="text-gray-600 mb-6 max-w-md mx-auto">
             Browse our listings and save your favorite properties to view them
             later
-          </Typography>
-          <Button
-            component={Link}
+          </p>
+          <Link
             to="/properties"
-            variant="contained"
-            color="primary"
-            size="large"
+            className="inline-block px-6 py-3 bg-black text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
           >
             Browse Properties
-          </Button>
-        </Box>
+          </Link>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }
 

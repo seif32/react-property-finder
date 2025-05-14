@@ -1,56 +1,65 @@
+"use client";
+
 import { Link } from "react-router-dom";
-import { Card, CardMedia, CardContent, Typography, Box } from "@mui/material";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import HomeIcon from "@mui/icons-material/Home";
 
 function LocationCard({ location }) {
   return (
-    <Card
-      sx={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        transition: "transform 0.3s ease",
-        "&:hover": {
-          transform: "translateY(-4px)",
-          boxShadow: 4,
-        },
-      }}
-      component={Link}
+    <Link
       to={`/properties?location=${location.name}`}
-      className="no-underline"
+      className="block h-full bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md no-underline text-inherit"
     >
-      <CardMedia
-        component="img"
-        height="160"
-        image={`/placeholder.svg?height=400&width=600&query=${location.name} city view`}
-        alt={location.name}
-      />
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Typography variant="h6" component="div" gutterBottom>
+      <div className="h-40 overflow-hidden">
+        <img
+          src={`/placeholder.svg?key=cflgx&height=400&width=600&query=${location.name} city view`}
+          alt={location.name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      <div className="p-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
           {location.name}
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-          <LocationOnIcon fontSize="small" color="action" />
-          <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
-            {location.type}
-          </Typography>
-        </Box>
+        </h3>
+
+        <div className="flex items-center mb-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4 text-gray-500"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+              clipRule="evenodd"
+            />
+          </svg>
+          <span className="ml-1.5 text-sm text-gray-600">{location.type}</span>
+        </div>
+
         {location.subLocations && location.subLocations.length > 0 && (
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <HomeIcon fontSize="small" color="action" />
-            <Typography variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
+          <div className="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 text-gray-500"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+            </svg>
+            <span className="ml-1.5 text-sm text-gray-600">
               {location.subLocations.length} areas
-            </Typography>
-          </Box>
+            </span>
+          </div>
         )}
+
         {location.description && (
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          <p className="mt-2 text-sm text-gray-600 line-clamp-2">
             {location.description}
-          </Typography>
+          </p>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </Link>
   );
 }
 

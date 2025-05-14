@@ -1,17 +1,6 @@
+"use client";
+
 import { useState } from "react";
-import {
-  Container,
-  Typography,
-  Box,
-  Paper,
-  Avatar,
-  Grid,
-  TextField,
-  Button,
-  Divider,
-  Tab,
-  Tabs,
-} from "@mui/material";
 import { useForm } from "react-hook-form";
 import { currentUser } from "../data/dummyData";
 
@@ -30,7 +19,7 @@ function ProfilePage() {
     },
   });
 
-  const handleTabChange = (event, newValue) => {
+  const handleTabChange = (newValue) => {
     setActiveTab(newValue);
   };
 
@@ -47,95 +36,140 @@ function ProfilePage() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
-        Your Profile
-      </Typography>
-      <Divider sx={{ mb: 4 }} />
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-4">Your Profile</h1>
+      <div className="border-b border-gray-200 mb-8" />
 
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={4}>
-          <Paper elevation={1} sx={{ p: 3, textAlign: "center" }}>
-            <Avatar
-              sx={{
-                width: 120,
-                height: 120,
-                mx: "auto",
-                mb: 2,
-                bgcolor: "primary.main",
-                fontSize: "3rem",
-              }}
-            >
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        {/* Profile Sidebar */}
+        <div className="md:col-span-1">
+          <div className="bg-white rounded-lg shadow-sm p-6 text-center">
+            <div className="w-24 h-24 bg-gray-800 text-white text-4xl rounded-full flex items-center justify-center mx-auto mb-4">
               {currentUser.firstName.charAt(0)}
-            </Avatar>
-            <Typography variant="h5" gutterBottom>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-1">
               {currentUser.firstName} {currentUser.lastName}
-            </Typography>
-            <Typography variant="body1" color="text.secondary" gutterBottom>
-              {currentUser.email}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
+            </h2>
+            <p className="text-gray-600 mb-2">{currentUser.email}</p>
+            <p className="text-sm text-gray-500 mb-4">
               Member since {new Date().getFullYear()}
-            </Typography>
-            <Button
-              variant="outlined"
-              color="primary"
-              sx={{ mt: 2 }}
-              onClick={() => console.log("Change profile picture")}
-            >
+            </p>
+            <button className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
               Change Picture
-            </Button>
-          </Paper>
-        </Grid>
+            </button>
+          </div>
+        </div>
 
-        <Grid item xs={12} md={8}>
-          <Paper elevation={1} sx={{ p: 3 }}>
-            <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-              <Tabs
-                value={activeTab}
-                onChange={handleTabChange}
-                aria-label="profile tabs"
-              >
-                <Tab label="Personal Information" />
-                <Tab label="Security" />
-                <Tab label="Preferences" />
-              </Tabs>
-            </Box>
-
-            {activeTab === 0 && (
-              <Box>
-                <Typography variant="h6" gutterBottom>
+        {/* Profile Content */}
+        <div className="md:col-span-3">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            {/* Tabs */}
+            <div className="border-b border-gray-200 mb-6">
+              <nav className="-mb-px flex space-x-8">
+                <button
+                  onClick={() => handleTabChange(0)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 0
+                      ? "border-black text-black"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
                   Personal Information
-                </Typography>
+                </button>
+                <button
+                  onClick={() => handleTabChange(1)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 1
+                      ? "border-black text-black"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Security
+                </button>
+                <button
+                  onClick={() => handleTabChange(2)}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === 2
+                      ? "border-black text-black"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+                >
+                  Preferences
+                </button>
+              </nav>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Personal Information
+                </h3>
                 <form onSubmit={handleSubmit(onSubmit)}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="First Name"
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label
+                        htmlFor="firstName"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        First Name
+                      </label>
+                      <input
+                        id="firstName"
+                        type="text"
+                        className={`w-full px-4 py-2 border ${
+                          errors.firstName
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
                         {...register("firstName", {
                           required: "First name is required",
                         })}
-                        error={!!errors.firstName}
-                        helperText={errors.firstName?.message}
                       />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Last Name"
+                      {errors.firstName && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.firstName.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="lastName"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Last Name
+                      </label>
+                      <input
+                        id="lastName"
+                        type="text"
+                        className={`w-full px-4 py-2 border ${
+                          errors.lastName ? "border-red-500" : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
                         {...register("lastName", {
                           required: "Last name is required",
                         })}
-                        error={!!errors.lastName}
-                        helperText={errors.lastName?.message}
                       />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Email Address"
+                      {errors.lastName && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.lastName.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label
+                        htmlFor="email"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Email Address
+                      </label>
+                      <input
+                        id="email"
                         type="email"
+                        className={`w-full px-4 py-2 border ${
+                          errors.email ? "border-red-500" : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
                         {...register("email", {
                           required: "Email is required",
                           pattern: {
@@ -143,14 +177,29 @@ function ProfilePage() {
                             message: "Invalid email address",
                           },
                         })}
-                        error={!!errors.email}
-                        helperText={errors.email?.message}
                       />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Phone Number"
+                      {errors.email && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.email.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label
+                        htmlFor="phoneNumber"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Phone Number
+                      </label>
+                      <input
+                        id="phoneNumber"
+                        type="tel"
+                        className={`w-full px-4 py-2 border ${
+                          errors.phoneNumber
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
                         {...register("phoneNumber", {
                           required: "Phone number is required",
                           pattern: {
@@ -158,44 +207,73 @@ function ProfilePage() {
                             message: "Invalid phone number",
                           },
                         })}
-                        error={!!errors.phoneNumber}
-                        helperText={errors.phoneNumber?.message}
                       />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Button type="submit" variant="contained" color="primary">
-                        Save Changes
-                      </Button>
-                    </Grid>
-                  </Grid>
+                      {errors.phoneNumber && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.phoneNumber.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                  >
+                    Save Changes
+                  </button>
                 </form>
-              </Box>
+              </div>
             )}
 
             {activeTab === 1 && (
-              <Box>
-                <Typography variant="h6" gutterBottom>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Change Password
-                </Typography>
+                </h3>
                 <form onSubmit={handleSubmit(handlePasswordChange)}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Current Password"
+                  <div className="space-y-6 mb-6">
+                    <div>
+                      <label
+                        htmlFor="currentPassword"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Current Password
+                      </label>
+                      <input
+                        id="currentPassword"
                         type="password"
+                        className={`w-full px-4 py-2 border ${
+                          errors.currentPassword
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
                         {...register("currentPassword", {
                           required: "Current password is required",
                         })}
-                        error={!!errors.currentPassword}
-                        helperText={errors.currentPassword?.message}
                       />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="New Password"
+                      {errors.currentPassword && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.currentPassword.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="newPassword"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        New Password
+                      </label>
+                      <input
+                        id="newPassword"
                         type="password"
+                        className={`w-full px-4 py-2 border ${
+                          errors.newPassword
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
                         {...register("newPassword", {
                           required: "New password is required",
                           minLength: {
@@ -203,58 +281,79 @@ function ProfilePage() {
                             message: "Password must be at least 8 characters",
                           },
                         })}
-                        error={!!errors.newPassword}
-                        helperText={errors.newPassword?.message}
                       />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Confirm New Password"
+                      {errors.newPassword && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.newPassword.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="confirmPassword"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Confirm New Password
+                      </label>
+                      <input
+                        id="confirmPassword"
                         type="password"
+                        className={`w-full px-4 py-2 border ${
+                          errors.confirmPassword
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
                         {...register("confirmPassword", {
                           required: "Please confirm your password",
                           validate: (value, formValues) =>
                             value === formValues.newPassword ||
                             "Passwords do not match",
                         })}
-                        error={!!errors.confirmPassword}
-                        helperText={errors.confirmPassword?.message}
                       />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Button type="submit" variant="contained" color="primary">
-                        Change Password
-                      </Button>
-                    </Grid>
-                  </Grid>
+                      {errors.confirmPassword && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {errors.confirmPassword.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+                  >
+                    Change Password
+                  </button>
                 </form>
-              </Box>
+              </div>
             )}
 
             {activeTab === 2 && (
-              <Box>
-                <Typography variant="h6" gutterBottom>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Notification Preferences
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
+                </h3>
+                <p className="text-gray-500 mb-6">
                   Manage how you receive notifications and updates
-                </Typography>
-                <Box sx={{ mb: 3 }}>
+                </p>
+
+                <div className="mb-6">
                   {/* Notification preferences would go here */}
-                  <Typography variant="body1">
+                  <p className="text-gray-700">
                     This section would contain notification preferences controls
-                  </Typography>
-                </Box>
-                <Button variant="contained" color="primary">
+                  </p>
+                </div>
+
+                <button className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors">
                   Save Preferences
-                </Button>
-              </Box>
+                </button>
+              </div>
             )}
-          </Paper>
-        </Grid>
-      </Grid>
-    </Container>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

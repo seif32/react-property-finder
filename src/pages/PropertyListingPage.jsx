@@ -1,21 +1,7 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import {
-  Box,
-  Container,
-  Typography,
-  Grid,
-  Pagination,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Divider,
-  Chip,
-  Button,
-} from "@mui/material";
-import FilterListIcon from "@mui/icons-material/FilterList";
-import SortIcon from "@mui/icons-material/Sort";
 import { properties } from "../data/dummyData";
 import PropertySearchForm from "../components/PropertySearchForm";
 import PropertyCard from "../components/PropertyCard";
@@ -122,7 +108,7 @@ function PropertyListingPage() {
     setSortBy(event.target.value);
   };
 
-  const handlePageChange = (event, value) => {
+  const handlePageChange = (value) => {
     setCurrentPage(value);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -172,125 +158,205 @@ function PropertyListingPage() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">
         Property Listings
-      </Typography>
+      </h1>
 
-      <Box sx={{ mb: 4 }}>
-        <Button
-          variant="outlined"
-          startIcon={<FilterListIcon />}
+      <div className="mb-8">
+        <button
+          className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors mb-4"
           onClick={() => setShowFilters(!showFilters)}
-          sx={{ mb: 2 }}
         >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
+              clipRule="evenodd"
+            />
+          </svg>
           {showFilters ? "Hide Filters" : "Show Filters"}
-        </Button>
+        </button>
 
         {showFilters && (
-          <Box sx={{ mb: 3 }}>
+          <div className="mb-6">
             <PropertySearchForm onSearch={handleSearch} />
-          </Box>
+          </div>
         )}
 
         {activeFilters.length > 0 && (
-          <Box
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 1,
-              mb: 2,
-              alignItems: "center",
-            }}
-          >
-            <Typography variant="body2" color="text.secondary">
-              Active Filters:
-            </Typography>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <span className="text-sm text-gray-500">Active Filters:</span>
             {activeFilters.map((filter) => (
-              <Chip
+              <span
                 key={filter.key}
-                label={filter.label}
-                onDelete={() => handleRemoveFilter(filter.key)}
-                size="small"
-              />
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+              >
+                {filter.label}
+                <button
+                  type="button"
+                  className="ml-1.5 inline-flex items-center justify-center h-4 w-4 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none"
+                  onClick={() => handleRemoveFilter(filter.key)}
+                >
+                  <span className="sr-only">Remove filter</span>
+                  <svg
+                    className="h-2 w-2"
+                    stroke="currentColor"
+                    fill="none"
+                    viewBox="0 0 8 8"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeWidth="1.5"
+                      d="M1 1l6 6m0-6L1 7"
+                    />
+                  </svg>
+                </button>
+              </span>
             ))}
-            <Button size="small" onClick={handleClearAllFilters}>
+            <button
+              className="text-sm text-black hover:underline"
+              onClick={handleClearAllFilters}
+            >
               Clear All
-            </Button>
-          </Box>
+            </button>
+          </div>
         )}
 
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Typography variant="body1">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <p className="text-gray-700 mb-2 sm:mb-0">
             {filteredProperties.length}{" "}
             {filteredProperties.length === 1 ? "property" : "properties"} found
-          </Typography>
-          <FormControl variant="outlined" size="small" sx={{ minWidth: 150 }}>
-            <InputLabel id="sort-label">Sort By</InputLabel>
-            <Select
-              labelId="sort-label"
+          </p>
+          <div className="relative">
+            <select
               value={sortBy}
               onChange={handleSortChange}
-              label="Sort By"
-              startAdornment={<SortIcon fontSize="small" sx={{ mr: 1 }} />}
+              className="pl-8 pr-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-black appearance-none"
             >
-              <MenuItem value="newest">Newest</MenuItem>
-              <MenuItem value="price-asc">Price: Low to High</MenuItem>
-              <MenuItem value="price-desc">Price: High to Low</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Box>
+              <option value="newest">Newest</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+            <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-gray-500"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <Divider sx={{ mb: 4 }} />
+      <div className="border-t border-gray-200 mb-8" />
 
       {currentProperties.length > 0 ? (
         <>
-          <Grid container spacing={3}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentProperties.map((property) => (
-              <Grid item key={property.id} xs={12} sm={6} md={4}>
-                <PropertyCard property={property} />
-              </Grid>
+              <PropertyCard key={property.id} property={property} />
             ))}
-          </Grid>
+          </div>
 
           {totalPages > 1 && (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={handlePageChange}
-                color="primary"
-                size="large"
-              />
-            </Box>
+            <div className="flex justify-center mt-8">
+              <nav
+                className="inline-flex rounded-md shadow-sm -space-x-px"
+                aria-label="Pagination"
+              >
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium ${
+                    currentPage === 1
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-500 hover:bg-gray-50 cursor-pointer"
+                  }`}
+                >
+                  <span className="sr-only">Previous</span>
+                  <svg
+                    className="h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                {[...Array(totalPages)].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePageChange(index + 1)}
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                      currentPage === index + 1
+                        ? "z-10 bg-black text-white border-black"
+                        : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
+                    currentPage === totalPages
+                      ? "text-gray-300 cursor-not-allowed"
+                      : "text-gray-500 hover:bg-gray-50 cursor-pointer"
+                  }`}
+                >
+                  <span className="sr-only">Next</span>
+                  <svg
+                    className="h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </nav>
+            </div>
           )}
         </>
       ) : (
-        <Box sx={{ textAlign: "center", py: 8 }}>
-          <Typography variant="h5" gutterBottom>
+        <div className="text-center py-16">
+          <h2 className="text-2xl font-semibold text-gray-900 mb-3">
             No properties found
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
+          </h2>
+          <p className="text-gray-600 mb-6">
             Try adjusting your search filters to find more properties
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
+          </p>
+          <button
+            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
             onClick={handleClearAllFilters}
-            sx={{ mt: 2 }}
           >
             Clear All Filters
-          </Button>
-        </Box>
+          </button>
+        </div>
       )}
-    </Container>
+    </div>
   );
 }
 

@@ -1,70 +1,33 @@
-"use client";
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Menu from "@mui/material/Menu";
-import MenuIcon from "@mui/icons-material/Menu";
-import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import Tooltip from "@mui/material/Tooltip";
-import MenuItem from "@mui/material/MenuItem";
-import HomeIcon from "@mui/icons-material/Home";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
 import { useAuth } from "../auth/AuthContext";
 
-const pages = [
-  { name: "Home", path: "/" },
-  { name: "Properties", path: "/properties" },
-  { name: "Locations", path: "/locations" },
-];
-
-const settings = [
-  { name: "Profile", path: "/profile" },
-  { name: "My Properties", path: "/my-properties" },
-  { name: "Bookmarks", path: "/bookmarks" },
-  { name: "Logout", path: "/" }, // Logout uses a fake path (we’ll handle it)
-];
-
-function Header() {
-  const [anchorElNav, setAnchorElNav] = useState(null);
-  const [anchorElUser, setAnchorElUser] = useState(null);
+const Header = () => {
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  const { signOut, user } = useAuth(); // ✅ Access auth functions
+  const pages = [
+    { name: "Home", path: "/" },
+    { name: "Properties", path: "/properties" },
+    { name: "Locations", path: "/locations" },
+  ];
 
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
+  const settings = [
+    { name: "Profile", path: "/profile" },
+    { name: "My Properties", path: "/my-properties" },
+    { name: "Bookmarks", path: "/bookmarks" },
+    { name: "Logout", path: "/" },
+  ];
 
   const handleMenuItemClick = async (path, name) => {
-    handleCloseUserMenu();
+    setUserMenuOpen(false);
+    setMenuOpen(false);
 
     if (name === "Logout") {
-      try {
-        await signOut(); // ✅ Sign out from Firebase
-        console.log("User logged out");
-        navigate("/login"); // ✅ Redirect to login
-      } catch (error) {
-        console.error("Logout failed:", error);
-      }
+      await signOut();
+      navigate("/login");
       return;
     }
 
@@ -72,138 +35,85 @@ function Header() {
   };
 
   return (
-    <AppBar
-      position="static"
-      color="default"
-      elevation={1}
-      className="bg-white"
-    >
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <HomeIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
-          <Typography
-            variant="h6"
-            noWrap
-            component={Link}
-            to="/"
-            sx={{
-              mr: 2,
-              display: { xs: "none", md: "flex" },
-              fontWeight: 700,
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            PropertyFinder
-          </Typography>
+    <header className="bg-white shadow-md">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        {/* Logo */}
+        <Link to="/" className="text-xl font-bold text-gray-800">
+          PropertyFinder
+        </Link>
 
-          {/* Mobile nav */}
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              onClick={handleOpenNavMenu}
-              color="inherit"
+        {/* Mobile menu button */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden text-gray-600 focus:outline-none"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
+            />
+          </svg>
+        </button>
+
+        {/* Desktop nav */}
+        <nav className="hidden md:flex space-x-6">
+          {pages.map((page) => (
+            <Link
+              key={page.name}
+              to={page.path}
+              className="text-gray-700 hover:text-blue-600 font-medium"
             >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-              keepMounted
-              transformOrigin={{ vertical: "top", horizontal: "left" }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{ display: { xs: "block", md: "none" } }}
+              {page.name}
+            </Link>
+          ))}
+        </nav>
+
+        {/* User avatar/menu */}
+        {user && (
+          <div className="relative ml-4">
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-800 font-semibold focus:outline-none"
             >
-              {pages.map((page) => (
-                <MenuItem
-                  key={page.name}
-                  onClick={() => handleMenuItemClick(page.path, page.name)}
-                >
-                  <Typography textAlign="center">{page.name}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+              {user.firstName?.charAt(0).toUpperCase() || "U"}
+            </button>
 
-          <HomeIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component={Link}
-            to="/"
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontWeight: 700,
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            PropertyFinder
-          </Typography>
+            {userMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-50">
+                {settings.map((item) => (
+                  <button
+                    key={item.name}
+                    onClick={() => handleMenuItemClick(item.path, item.name)}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100 text-gray-700"
+                  >
+                    {item.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
-          {/* Desktop nav */}
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {pages.map((page) => (
-              <Button
-                key={page.name}
-                component={Link}
-                to={page.path}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: "inherit", display: "block" }}
-              >
-                {page.name}
-              </Button>
-            ))}
-          </Box>
-
-          {/* Bookmarks button */}
-          <Box sx={{ flexGrow: 0, mr: 2 }}>
-            <Tooltip title="View bookmarks">
-              <IconButton component={Link} to="/bookmarks" sx={{ p: 0 }}>
-                <BookmarkIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-
-          {/* User avatar & menu */}
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar
-                  alt={`${user?.firstName || "User"} ${user?.lastName || ""}`}
-                  src="/static/images/avatar/2.jpg"
-                />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              anchorEl={anchorElUser}
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
-              keepMounted
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
+      {/* Mobile dropdown */}
+      {menuOpen && (
+        <div className="md:hidden px-4 pb-4 space-y-2">
+          {pages.map((page) => (
+            <Link
+              key={page.name}
+              to={page.path}
+              onClick={() => setMenuOpen(false)}
+              className="block text-gray-700 hover:text-blue-600 font-medium"
             >
-              {settings.map((setting) => (
-                <MenuItem
-                  key={setting.name}
-                  onClick={() =>
-                    handleMenuItemClick(setting.path, setting.name)
-                  }
-                >
-                  <Typography textAlign="center">{setting.name}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+              {page.name}
+            </Link>
+          ))}
+        </div>
+      )}
+    </header>
   );
-}
+};
 
 export default Header;
