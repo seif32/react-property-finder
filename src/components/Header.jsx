@@ -16,27 +16,27 @@ import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import HomeIcon from "@mui/icons-material/Home";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
-import { currentUser } from "../data/dummyData";
+import { useAuth } from "../auth/AuthContext";
 
-// Update the pages array to include the new pages
 const pages = [
   { name: "Home", path: "/" },
   { name: "Properties", path: "/properties" },
   { name: "Locations", path: "/locations" },
 ];
 
-// Update the settings array to include My Properties
 const settings = [
   { name: "Profile", path: "/profile" },
   { name: "My Properties", path: "/my-properties" },
   { name: "Bookmarks", path: "/bookmarks" },
-  { name: "Logout", path: "/" },
+  { name: "Logout", path: "/" }, // Logout uses a fake path (we’ll handle it)
 ];
 
 function Header() {
   const [anchorElNav, setAnchorElNav] = useState(null);
   const [anchorElUser, setAnchorElUser] = useState(null);
   const navigate = useNavigate();
+
+  const { signOut, user } = useAuth(); // ✅ Access auth functions
 
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
@@ -54,17 +54,21 @@ function Header() {
     setAnchorElUser(null);
   };
 
-  const handleMenuItemClick = (path) => {
-    navigate(path);
+  const handleMenuItemClick = async (path, name) => {
     handleCloseUserMenu();
 
-    if (
-      path === "/" &&
-      settings.find((s) => s.path === path)?.name === "Logout"
-    ) {
-      console.log("User logged out");
-      // In a real app, you would handle logout here
+    if (name === "Logout") {
+      try {
+        await signOut(); // ✅ Sign out from Firebase
+        console.log("User logged out");
+        navigate("/login"); // ✅ Redirect to login
+      } catch (error) {
+        console.error("Logout failed:", error);
+      }
+      return;
     }
+
+    navigate(path);
   };
 
   return (
@@ -76,7 +80,6 @@ function Header() {
     >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          {/* Logo for desktop */}
           <HomeIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
           <Typography
             variant="h6"
@@ -94,13 +97,10 @@ function Header() {
             PropertyFinder
           </Typography>
 
-          {/* Mobile menu */}
+          {/* Mobile nav */}
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
               size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
               onClick={handleOpenNavMenu}
               color="inherit"
             >
@@ -109,25 +109,17 @@ function Header() {
             <Menu
               id="menu-appbar"
               anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
+              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
               keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
+              transformOrigin={{ vertical: "top", horizontal: "left" }}
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: "block", md: "none" },
-              }}
+              sx={{ display: { xs: "block", md: "none" } }}
             >
               {pages.map((page) => (
                 <MenuItem
                   key={page.name}
-                  onClick={() => handleMenuItemClick(page.path)}
+                  onClick={() => handleMenuItemClick(page.path, page.name)}
                 >
                   <Typography textAlign="center">{page.name}</Typography>
                 </MenuItem>
@@ -135,7 +127,6 @@ function Header() {
             </Menu>
           </Box>
 
-          {/* Logo for mobile */}
           <HomeIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
           <Typography
             variant="h5"
@@ -154,7 +145,7 @@ function Header() {
             PropertyFinder
           </Typography>
 
-          {/* Desktop menu */}
+          {/* Desktop nav */}
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page) => (
               <Button
@@ -178,36 +169,31 @@ function Header() {
             </Tooltip>
           </Box>
 
-          {/* User menu */}
+          {/* User avatar & menu */}
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar
-                  alt={`${currentUser.firstName} ${currentUser.lastName}`}
+                  alt={`${user?.firstName || "User"} ${user?.lastName || ""}`}
                   src="/static/images/avatar/2.jpg"
                 />
               </IconButton>
             </Tooltip>
             <Menu
               sx={{ mt: "45px" }}
-              id="menu-appbar"
               anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
+              anchorOrigin={{ vertical: "top", horizontal: "right" }}
               keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
               {settings.map((setting) => (
                 <MenuItem
                   key={setting.name}
-                  onClick={() => handleMenuItemClick(setting.path)}
+                  onClick={() =>
+                    handleMenuItemClick(setting.path, setting.name)
+                  }
                 >
                   <Typography textAlign="center">{setting.name}</Typography>
                 </MenuItem>

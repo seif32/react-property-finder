@@ -1,4 +1,4 @@
-import { API_BASE_URL, ERROR_MESSAGES } from "./constants/apiConstants";
+import { API_BASE_URL, ERROR_MESSAGES } from "../constants/apiConstants";
 
 /**
  * Get all users
@@ -43,25 +43,44 @@ export const getUserById = async (id) => {
  * Create a new user
  * @param {Object} userData - User data
  */
-export const createUser = async (userData) => {
+export const createUser = async (userData, token) => {
   try {
+    console.log("[createUser] Called with data:", userData);
+    console.log("[createUser] Using token:", token);
+
     const response = await fetch(`${API_BASE_URL}/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(userData),
     });
 
+    console.log("[createUser] Response status:", response.status);
+
+    // Log raw response if it's not OK
     if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || ERROR_MESSAGES.SERVER_ERROR);
+      const errorText = await response.text().catch(() => "");
+      console.error("[createUser] Failed response body:", errorText);
+
+      let parsedError = {};
+      try {
+        parsedError = JSON.parse(errorText);
+      } catch (_) {
+        parsedError.message = errorText || "Server error";
+      }
+
+      throw new Error(parsedError?.message || "Server error");
     }
 
-    return await response.json();
+    const data = await response.json();
+    console.log("[createUser] User created successfully:", data);
+
+    return data;
   } catch (error) {
-    console.error("Error creating user:", error);
-    throw error.message || ERROR_MESSAGES.DEFAULT;
+    console.error("[createUser] Error occurred:", error.message);
+    throw error;
   }
 };
 
@@ -146,5 +165,34 @@ export const changePassword = async (id, currentPassword, newPassword) => {
   } catch (error) {
     console.error(`Error changing password for user ${id}:`, error);
     throw error.message || ERROR_MESSAGES.DEFAULT;
+  }
+};
+
+// apiUser.js
+export const getCurrentUser = async (token) => {
+  try {
+    console.log("[getCurrentUser] Called with token:", token);
+
+    const response = await fetch(`${API_BASE_URL}/users/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log("[getCurrentUser] Response status:", response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[getCurrentUser] Failed response body:", errorText);
+      throw new Error(`Failed to fetch current user: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("[getCurrentUser] User data received:", data);
+
+    return data;
+  } catch (error) {
+    console.error("[getCurrentUser] Error occurred:", error.message);
+    throw error;
   }
 };

@@ -16,61 +16,117 @@ import ProfilePage from "./pages/ProfilePage";
 import AgentProfilePage from "./pages/AgentProfilePage";
 import LocationBrowsePage from "./pages/LocationBrowsePage";
 import NotFoundPage from "./pages/NotFoundPage";
+import LoginPage from "./auth/screens/LoginPage";
+import SignUpPage from "./auth/screens/SignUp";
+import { AuthProvider } from "./auth/AuthContext";
+import ProtectedRoute from "./auth/screens/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
+  { path: "login", element: <LoginPage /> },
+  { path: "signup", element: <SignUpPage /> },
   {
     path: "/",
     element: <RootLayout />,
     children: [
       {
         index: true,
-        element: <HomePage />,
+        element: (
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+        ),
       },
+
       {
         path: "properties",
-        element: <PropertyListingPage />,
+        element: (
+          <ProtectedRoute>
+            <PropertyListingPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "properties/:id",
-        element: <PropertyDetailPage />,
+        element: (
+          <ProtectedRoute>
+            <PropertyDetailPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "properties/create",
-        element: <CreatePropertyPage />,
+        element: (
+          <ProtectedRoute>
+            <CreatePropertyPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "properties/:id/edit",
-        element: <EditPropertyPage />,
+
+        element: (
+          <ProtectedRoute>
+            <EditPropertyPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "properties/:id/images",
-        element: <PropertyImagesPage />,
+        element: (
+          <ProtectedRoute>
+            <PropertyImagesPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "my-properties",
-        element: <MyPropertiesPage />,
+        element: (
+          <ProtectedRoute>
+            <MyPropertiesPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "bookmarks",
-        element: <BookmarksPage />,
+        element: (
+          <ProtectedRoute>
+            <BookmarksPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "profile",
-        element: <ProfilePage />,
+        element: (
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "agents/:id",
-        element: <AgentProfilePage />,
+        element: (
+          <ProtectedRoute>
+            <AgentProfilePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "locations",
-        element: <LocationBrowsePage />,
+        element: (
+          <ProtectedRoute>
+            <LocationBrowsePage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "*",
-        element: <NotFoundPage />,
+        element: (
+          <ProtectedRoute>
+            <NotFoundPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },
@@ -78,8 +134,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </AuthProvider>
   </React.StrictMode>
 );

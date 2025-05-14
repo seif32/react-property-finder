@@ -19,8 +19,12 @@ import SortIcon from "@mui/icons-material/Sort";
 import { properties } from "../data/dummyData";
 import PropertySearchForm from "../components/PropertySearchForm";
 import PropertyCard from "../components/PropertyCard";
+import { useAuth } from "../auth/AuthContext";
 
 function PropertyListingPage() {
+  const { user } = useAuth();
+  console.log(user);
+
   const [searchParams, setSearchParams] = useSearchParams();
   const [filteredProperties, setFilteredProperties] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);

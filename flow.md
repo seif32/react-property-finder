@@ -492,35 +492,3 @@
 3. User views properties in selected area
 4. User may compare properties across neighborhoods
 5. User may expand search to nearby areas
-
-## 8. Mobile-Specific Considerations
-
-### 8.1 Location Services
-
-- Mobile app requests location permission
-- System suggests nearby properties based on user location
-- Map view shows properties relative to user position
-- Directions to property available from current location
-
-### 8.2 Offline Capabilities
-
-- Bookmarked properties available offline
-- Search history saved for offline access
-- Changes queued when offline and synced when online
-- Notification when connection restored
-
-## 9. Analytics and Reporting (Conceptual)
-
-### 9.1 User Analytics
-
-- Track user search patterns
-- Monitor popular properties and locations
-- Analyze user engagement metrics
-- Identify conversion points (views to inquiries)
-
-### 9.2 Agent Performance
-
-- Track property listing views
-- Monitor inquiry response rates
-- Analyze property listing quality
-- Provide insights for improvement
