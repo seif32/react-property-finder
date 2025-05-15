@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import PropertyImageGallery from "../components/PropertyImageGallery";
 import PropertyReviews from "../components/PropertyReviews";
 import PropertyCard from "../components/PropertyCard";
@@ -16,8 +16,13 @@ import { useDeleteBookmarkByUserAndProperty } from "../hooks/bookmark/useDeleteB
 
 function PropertyDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { data: properties, isLoading } = useGetAllProperties();
   const [isBookmarked, setIsBookmarked] = useState(false);
+
+  const handleContactAgent = () => {
+    navigate(`/properties/${id}/request-appointment`);
+  };
 
   const { user } = useAuth();
 
@@ -367,7 +372,10 @@ function PropertyDetailPage() {
             >
               {property.listingType === "Sale" ? "For Sale" : "For Rent"}
             </span>
-            <button className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition-colors mb-3">
+            <button
+              onClick={handleContactAgent}
+              className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition-colors mb-3"
+            >
               Contact Agent
             </button>
             <button className="w-full border border-black text-black py-2 rounded-lg hover:bg-gray-100 transition-colors">

@@ -82,3 +82,47 @@
 - `DELETE /api/users/{id}` – Delete a user
 
 ---
+
+Got it! Here's the **shortcut-style API documentation** for the `ViewingRequest` endpoints, following your format:
+
+---
+
+### 📅 **Appointments Endpoints**
+
+#### **Create Viewing Request**
+
+`POST /api/viewing-requests`
+Create a new viewing request
+📥 Request Body:
+
+```json
+{
+  "userId": 12,
+  "propertyId": 45,
+  "requestedDateTime": "2025-06-01T14:00:00",
+  "message": "I'd love to view the property this weekend."
+}
+```
+
+---
+
+#### **Get Viewing Requests by Agent**
+
+`GET /api/viewing-requests/agent/{agentId}`
+Fetch all viewing requests for properties owned by a specific agent
+📌 Path Param: `agentId` (Long)
+
+---
+
+#### **Update Viewing Request Status**
+
+`PATCH /api/viewing-requests/{id}`
+Update status of a viewing request (`PENDING`, `APPROVED`, `DECLINED`)
+📌 Path Param: `id` (Long)
+📥 Request Body:
+
+```json
+{
+  "status": "APPROVED"
+}
+```

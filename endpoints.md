@@ -784,3 +784,146 @@ Delete a user by ID.
 ---
 
 > ⚠️ **Note:** Password is only accepted in `POST`/`PUT` requests and is not returned in any response.
+
+## 📘 Appointments API Documentation
+
+### 📌 Base URL
+
+```
+/api/viewing-requests
+```
+
+---
+
+### 🔹 1. Create a Viewing Request (User)
+
+**Endpoint:**
+
+```
+POST /api/viewing-requests
+```
+
+**Description:**
+Creates a new viewing request for a specific property. The agent is automatically determined based on the property's owner.
+
+**Request Body (JSON):**
+
+```json
+{
+  "userId": 12,
+  "propertyId": 45,
+  "requestedDateTime": "2025-06-01T14:00:00",
+  "message": "I'd love to view the property this weekend."
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": 101,
+  "user": { "id": 12, "name": "John Doe", ... },
+  "agent": { "id": 5, "name": "Agent Smith", ... },
+  "property": { "id": 45, "title": "Modern Villa", ... },
+  "requestedDateTime": "2025-06-01T14:00:00",
+  "status": "PENDING",
+  "message": "I'd love to view the property this weekend.",
+  "createdAt": "2025-05-15T11:00:00"
+}
+```
+
+**Possible Status Codes:**
+
+- `201 Created` – Successfully created
+- `404 Not Found` – User or Property does not exist
+- `400 Bad Request` – Validation failed
+
+---
+
+### 🔹 2. Get Viewing Requests by Agent
+
+**Endpoint:**
+
+```
+GET /api/viewing-requests/agent/{agentId}
+```
+
+**Description:**
+Returns all viewing requests associated with a specific agent (i.e. properties owned by the agent).
+
+**Path Parameter:**
+
+- `agentId` – The agent’s user ID
+
+**Example Response:**
+
+```json
+[
+  {
+    "id": 101,
+    "user": { "id": 12, "name": "John Doe", ... },
+    "agent": { "id": 5, "name": "Agent Smith", ... },
+    "property": { "id": 45, "title": "Modern Villa", ... },
+    "requestedDateTime": "2025-06-01T14:00:00",
+    "status": "PENDING",
+    "message": "I'd love to view the property this weekend.",
+    "createdAt": "2025-05-15T11:00:00"
+  }
+]
+```
+
+**Possible Status Codes:**
+
+- `200 OK` – Successfully retrieved
+- `404 Not Found` – Agent ID invalid or has no requests
+
+---
+
+### 🔹 3. Update Viewing Request Status (Agent)
+
+**Endpoint:**
+
+```
+PATCH /api/viewing-requests/{id}
+```
+
+**Description:**
+Allows the agent to update the status of a viewing request (e.g., approve or decline).
+
+**Path Parameter:**
+
+- `id` – The ID of the viewing request
+
+**Request Body:**
+
+```json
+{
+  "status": "APPROVED"
+}
+```
+
+**Accepted Status Values:**
+
+- `PENDING`
+- `APPROVED`
+- `DECLINED`
+
+**Response:**
+
+```json
+{
+  "id": 101,
+  "status": "APPROVED",
+  "requestedDateTime": "2025-06-01T14:00:00",
+  "message": "I'd love to view the property this weekend.",
+  "createdAt": "2025-05-15T11:00:00"
+}
+```
+
+**Possible Status Codes:**
+
+- `200 OK` – Successfully updated
+- `404 Not Found` – Request ID not found
+- `400 Bad Request` – Invalid status value
+
+---

@@ -22,6 +22,8 @@ import { AuthProvider } from "./auth/AuthContext";
 import ProtectedRoute from "./auth/screens/ProtectedRoute";
 import AdminUserManagement from "./pages/AdminUserManagement";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+import ViewingRequestsPage from "./pages/ViewingRequestsPage";
+import RequestAppointmentPage from "./pages/RequestAppointmentPage";
 
 const queryClient = new QueryClient();
 
@@ -61,7 +63,7 @@ const router = createBrowserRouter([
       {
         path: "properties/create",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole={"AGENT"}>
             <CreatePropertyPage />
           </ProtectedRoute>
         ),
@@ -70,7 +72,7 @@ const router = createBrowserRouter([
         path: "properties/:id/edit",
 
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole={"AGENT"}>
             <EditPropertyPage />
           </ProtectedRoute>
         ),
@@ -78,7 +80,7 @@ const router = createBrowserRouter([
       {
         path: "properties/:id/images",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole={"AGENT"}>
             <PropertyImagesPage />
           </ProtectedRoute>
         ),
@@ -86,7 +88,7 @@ const router = createBrowserRouter([
       {
         path: "my-properties",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole={"AGENT"}>
             <MyPropertiesPage />
           </ProtectedRoute>
         ),
@@ -94,7 +96,7 @@ const router = createBrowserRouter([
       {
         path: "bookmarks",
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole={"USER"}>
             <BookmarksPage />
           </ProtectedRoute>
         ),
@@ -128,6 +130,22 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredRole={"ADMIN"}>
             <AdminUserManagement />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "properties/:propertyId/request-appointment",
+        element: (
+          <ProtectedRoute requiredRole={"USER"}>
+            <RequestAppointmentPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "agent/viewing-requests",
+        element: (
+          <ProtectedRoute requiredRole={"AGENT"}>
+            <ViewingRequestsPage />
           </ProtectedRoute>
         ),
       },
