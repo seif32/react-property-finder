@@ -1,4 +1,4 @@
-import { API_BASE_URL, ERROR_MESSAGES } from "./constants/apiConstants";
+import { API_BASE_URL, ERROR_MESSAGES } from "../constants/apiConstants";
 
 /**
  * Get all reviews

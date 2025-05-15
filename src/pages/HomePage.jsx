@@ -5,9 +5,14 @@ import { Link } from "react-router-dom";
 import { locations, properties } from "../data/dummyData";
 import PropertySearchForm from "../components/PropertySearchForm";
 import PropertyCard from "../components/PropertyCard";
+import { useGetAllProperties } from "../hooks/property/useGetAllProperties";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function HomePage() {
-  const [featuredProperties] = useState(properties.slice(0, 3));
+  const { data: properties, isLoading } = useGetAllProperties();
+  if (isLoading) return <LoadingSpinner />;
+
+  const featuredProperties = properties.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-gray-50">

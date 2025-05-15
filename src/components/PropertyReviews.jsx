@@ -1,12 +1,13 @@
-"use client";
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { currentUser } from "../data/dummyData";
+import { useCreateReview } from "../hooks/review/useCreateReview";
+import { useAuth } from "../auth/AuthContext";
 
 function PropertyReviews({ reviews, propertyId }) {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [localReviews, setLocalReviews] = useState(reviews);
+
+  const { user } = useAuth();
 
   const {
     register,
@@ -20,26 +21,28 @@ function PropertyReviews({ reviews, propertyId }) {
     },
   });
 
-  const onSubmit = (data) => {
-    console.log("Review submitted:", data);
+  const { mutate: createReview, isLoading: submittingReview } = useCreateReview(
+    {
+      onSuccess: () => {
+        reset();
+        setShowReviewForm(false);
+      },
+    }
+  );
 
-    // Create a new review object
-    const newReview = {
-      id: Date.now(), // Generate a temporary ID
-      userId: currentUser.id,
-      userName: `${currentUser.firstName} ${currentUser.lastName}`,
+  const onSubmit = (data) => {
+    const reviewPayload = {
+      userId: user.id,
+      userName: `${user.firstName} ${user.lastName}`,
       propertyId,
       rating: data.rating,
       comment: data.comment,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(), // Optional if backend sets it
     };
 
-    // Add the new review to the local state
-    setLocalReviews([newReview, ...localReviews]);
+    createReview(reviewPayload);
 
-    // Reset the form and hide it
-    reset();
-    setShowReviewForm(false);
+    setLocalReviews([reviewPayload, ...localReviews]);
   };
 
   const calculateAverageRating = () => {

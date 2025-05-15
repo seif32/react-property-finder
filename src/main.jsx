@@ -20,12 +20,15 @@ import LoginPage from "./auth/screens/LoginPage";
 import SignUpPage from "./auth/screens/SignUp";
 import { AuthProvider } from "./auth/AuthContext";
 import ProtectedRoute from "./auth/screens/ProtectedRoute";
+import AdminUserManagement from "./pages/AdminUserManagement";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   { path: "login", element: <LoginPage /> },
   { path: "signup", element: <SignUpPage /> },
+  { path: "unauthorized", element: <UnauthorizedPage /> },
   {
     path: "/",
     element: <RootLayout />,
@@ -120,6 +123,15 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "admin/users",
+        element: (
+          <ProtectedRoute requiredRole={"ADMIN"}>
+            <AdminUserManagement />
+          </ProtectedRoute>
+        ),
+      },
+
       {
         path: "*",
         element: (

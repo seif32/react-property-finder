@@ -2,20 +2,24 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { currentUser } from "../data/dummyData";
+import { useAuth } from "../auth/AuthContext";
+import { useUpdateUser } from "../hooks/user/useUpdateUser";
+import { useChangePassword } from "../hooks/user/useChangePassword";
 
 function ProfilePage() {
   const [activeTab, setActiveTab] = useState(0);
+  const { user } = useAuth();
+  const { mutate: updateUser, isPending } = useUpdateUser();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      firstName: currentUser.firstName,
-      lastName: currentUser.lastName,
-      email: currentUser.email,
-      phoneNumber: currentUser.phoneNumber,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
     },
   });
 
@@ -24,9 +28,7 @@ function ProfilePage() {
   };
 
   const onSubmit = (data) => {
-    console.log("Profile updated with data:", data);
-    // In a real app, you would call an API to update the user profile
-    alert("Profile updated successfully!");
+    updateUser({ userId: user.id, userData: data });
   };
 
   const handlePasswordChange = (data) => {
@@ -45,12 +47,12 @@ function ProfilePage() {
         <div className="md:col-span-1">
           <div className="bg-white rounded-lg shadow-sm p-6 text-center">
             <div className="w-24 h-24 bg-gray-800 text-white text-4xl rounded-full flex items-center justify-center mx-auto mb-4">
-              {currentUser.firstName.charAt(0)}
+              {user.firstName.charAt(0)}
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {currentUser.firstName} {currentUser.lastName}
+              {user.firstName} {user.lastName}
             </h2>
-            <p className="text-gray-600 mb-2">{currentUser.email}</p>
+            <p className="text-gray-600 mb-2">{user.email}</p>
             <p className="text-sm text-gray-500 mb-4">
               Member since {new Date().getFullYear()}
             </p>
@@ -76,7 +78,7 @@ function ProfilePage() {
                 >
                   Personal Information
                 </button>
-                <button
+                {/* <button
                   onClick={() => handleTabChange(1)}
                   className={`py-4 px-1 border-b-2 font-medium text-sm ${
                     activeTab === 1
@@ -95,7 +97,7 @@ function ProfilePage() {
                   }`}
                 >
                   Preferences
-                </button>
+                </button> */}
               </nav>
             </div>
 
@@ -225,131 +227,6 @@ function ProfilePage() {
                 </form>
               </div>
             )}
-
-            {activeTab === 1 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Change Password
-                </h3>
-                <form onSubmit={handleSubmit(handlePasswordChange)}>
-                  <div className="space-y-6 mb-6">
-                    <div>
-                      <label
-                        htmlFor="currentPassword"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Current Password
-                      </label>
-                      <input
-                        id="currentPassword"
-                        type="password"
-                        className={`w-full px-4 py-2 border ${
-                          errors.currentPassword
-                            ? "border-red-500"
-                            : "border-gray-300"
-                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
-                        {...register("currentPassword", {
-                          required: "Current password is required",
-                        })}
-                      />
-                      {errors.currentPassword && (
-                        <p className="mt-1 text-sm text-red-500">
-                          {errors.currentPassword.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="newPassword"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        New Password
-                      </label>
-                      <input
-                        id="newPassword"
-                        type="password"
-                        className={`w-full px-4 py-2 border ${
-                          errors.newPassword
-                            ? "border-red-500"
-                            : "border-gray-300"
-                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
-                        {...register("newPassword", {
-                          required: "New password is required",
-                          minLength: {
-                            value: 8,
-                            message: "Password must be at least 8 characters",
-                          },
-                        })}
-                      />
-                      {errors.newPassword && (
-                        <p className="mt-1 text-sm text-red-500">
-                          {errors.newPassword.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="confirmPassword"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Confirm New Password
-                      </label>
-                      <input
-                        id="confirmPassword"
-                        type="password"
-                        className={`w-full px-4 py-2 border ${
-                          errors.confirmPassword
-                            ? "border-red-500"
-                            : "border-gray-300"
-                        } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
-                        {...register("confirmPassword", {
-                          required: "Please confirm your password",
-                          validate: (value, formValues) =>
-                            value === formValues.newPassword ||
-                            "Passwords do not match",
-                        })}
-                      />
-                      {errors.confirmPassword && (
-                        <p className="mt-1 text-sm text-red-500">
-                          {errors.confirmPassword.message}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-                  >
-                    Change Password
-                  </button>
-                </form>
-              </div>
-            )}
-
-            {activeTab === 2 && (
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Notification Preferences
-                </h3>
-                <p className="text-gray-500 mb-6">
-                  Manage how you receive notifications and updates
-                </p>
-
-                <div className="mb-6">
-                  {/* Notification preferences would go here */}
-                  <p className="text-gray-700">
-                    This section would contain notification preferences controls
-                  </p>
-                </div>
-
-                <button className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors">
-                  Save Preferences
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -358,3 +235,125 @@ function ProfilePage() {
 }
 
 export default ProfilePage;
+
+// {
+//   activeTab === 1 && (
+//     <div>
+//       <h3 className="text-lg font-semibold text-gray-900 mb-4">
+//         Change Password
+//       </h3>
+//       <form onSubmit={handleSubmit(handlePasswordChange)}>
+//         <div className="space-y-6 mb-6">
+//           <div>
+//             <label
+//               htmlFor="currentPassword"
+//               className="block text-sm font-medium text-gray-700 mb-1"
+//             >
+//               Current Password
+//             </label>
+//             <input
+//               id="currentPassword"
+//               type="password"
+//               className={`w-full px-4 py-2 border ${
+//                 errors.currentPassword ? "border-red-500" : "border-gray-300"
+//               } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
+//               {...register("currentPassword", {
+//                 required: "Current password is required",
+//               })}
+//             />
+//             {errors.currentPassword && (
+//               <p className="mt-1 text-sm text-red-500">
+//                 {errors.currentPassword.message}
+//               </p>
+//             )}
+//           </div>
+
+//           <div>
+//             <label
+//               htmlFor="newPassword"
+//               className="block text-sm font-medium text-gray-700 mb-1"
+//             >
+//               New Password
+//             </label>
+//             <input
+//               id="newPassword"
+//               type="password"
+//               className={`w-full px-4 py-2 border ${
+//                 errors.newPassword ? "border-red-500" : "border-gray-300"
+//               } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
+//               {...register("newPassword", {
+//                 required: "New password is required",
+//                 minLength: {
+//                   value: 8,
+//                   message: "Password must be at least 8 characters",
+//                 },
+//               })}
+//             />
+//             {errors.newPassword && (
+//               <p className="mt-1 text-sm text-red-500">
+//                 {errors.newPassword.message}
+//               </p>
+//             )}
+//           </div>
+
+//           <div>
+//             <label
+//               htmlFor="confirmPassword"
+//               className="block text-sm font-medium text-gray-700 mb-1"
+//             >
+//               Confirm New Password
+//             </label>
+//             <input
+//               id="confirmPassword"
+//               type="password"
+//               className={`w-full px-4 py-2 border ${
+//                 errors.confirmPassword ? "border-red-500" : "border-gray-300"
+//               } rounded-lg focus:outline-none focus:ring-2 focus:ring-black`}
+//               {...register("confirmPassword", {
+//                 required: "Please confirm your password",
+//                 validate: (value, formValues) =>
+//                   value === formValues.newPassword || "Passwords do not match",
+//               })}
+//             />
+//             {errors.confirmPassword && (
+//               <p className="mt-1 text-sm text-red-500">
+//                 {errors.confirmPassword.message}
+//               </p>
+//             )}
+//           </div>
+//         </div>
+
+//         <button
+//           type="submit"
+//           className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+//         >
+//           Change Password
+//         </button>
+//       </form>
+//     </div>
+//   );
+// }
+
+// {
+//   activeTab === 2 && (
+//     <div>
+//       <h3 className="text-lg font-semibold text-gray-900 mb-2">
+//         Notification Preferences
+//       </h3>
+//       <p className="text-gray-500 mb-6">
+//         Manage how you receive notifications and updates
+//       </p>
+
+//       <div className="mb-6">
+//         {/* Notification preferences would go here */}
+//         <p className="text-gray-700">
+//           This section would contain notification preferences controls
+//         </p>
+//       </div>
+
+//       <button className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors">
+//         Save Preferences
+//       </button>
+//     </div>
+//   );
+// }

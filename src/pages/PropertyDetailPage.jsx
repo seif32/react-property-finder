@@ -2,33 +2,29 @@
 
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { currentUser, properties } from "../data/dummyData";
 import PropertyImageGallery from "../components/PropertyImageGallery";
 import PropertyReviews from "../components/PropertyReviews";
 import PropertyCard from "../components/PropertyCard";
+import { useGetPropertyById } from "../hooks/property/useGetPropertyById";
+import { useGetAllProperties } from "../hooks/property/useGetAllProperties";
+import { useGetPropertyImages } from "../hooks/property-image/useGetPropertyImages";
+import { useGetPropertyReviews } from "../hooks/review/useGetPropertyReviews";
 
 function PropertyDetailPage() {
   const { id } = useParams();
-  const [property, setProperty] = useState(null);
+  const { data: properties, isLoading } = useGetAllProperties();
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: property,
+    isLoading: loading,
+    isError,
+  } = useGetPropertyById(id);
 
-  useEffect(() => {
-    // Simulate API call
-    const fetchProperty = () => {
-      setLoading(true);
-      setTimeout(() => {
-        const foundProperty = properties.find(
-          (p) => p.id === Number.parseInt(id)
-        );
-        setProperty(foundProperty || null);
-        setIsBookmarked(currentUser.bookmarks.includes(Number.parseInt(id)));
-        setLoading(false);
-      }, 500);
-    };
+  const { data: images = [], isLoading: loadingImages } =
+    useGetPropertyImages(id);
 
-    fetchProperty();
-  }, [id]);
+  const { data: reviews = [], isLoading: loadingReviews } =
+    useGetPropertyReviews(id);
 
   const handleBookmarkToggle = () => {
     setIsBookmarked(!isBookmarked);
@@ -43,7 +39,7 @@ function PropertyDetailPage() {
     alert("Share functionality would be implemented here");
   };
 
-  if (loading) {
+  if (loading || isLoading || loadingImages || loadingReviews) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900" />
@@ -222,7 +218,17 @@ function PropertyDetailPage() {
       </div>
 
       {/* Property Images */}
-      <PropertyImageGallery images={property.images} />
+      {loadingImages ? (
+        <div className="h-64 flex items-center justify-center">
+          Loading images...
+        </div>
+      ) : images.length > 0 ? (
+        <PropertyImageGallery images={images} />
+      ) : (
+        <div className="h-64 flex items-center justify-center text-gray-500">
+          No images available.
+        </div>
+      )}
 
       {/* Property Details */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mt-8">
@@ -306,10 +312,7 @@ function PropertyDetailPage() {
 
           {/* Reviews */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <PropertyReviews
-              reviews={property.reviews}
-              propertyId={property.id}
-            />
+            <PropertyReviews reviews={reviews} propertyId={property.id} />
           </div>
         </div>
 

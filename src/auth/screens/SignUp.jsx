@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 
 export default function SignUpPage() {
@@ -10,11 +10,12 @@ export default function SignUpPage() {
   } = useForm();
 
   const { signUp } = useAuth();
+  const navigate = useNavigate();
 
-  function onSubmit(data) {
+  async function onSubmit(data) {
     const { email, password, ...userDetails } = data;
-    console.log("SignUp", userDetails);
-    signUp(email, password, userDetails);
+    await signUp(email, password, userDetails);
+    navigate("/login");
   }
 
   return (
@@ -171,7 +172,7 @@ export default function SignUpPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Already have an account?{" "}
                 <Link
-                  to="/"
+                  to="/login"
                   className="font-medium text-purple-600 hover:text-purple-500"
                 >
                   Sign in

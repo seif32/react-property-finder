@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext";
 
 export default function LoginPage() {
@@ -10,9 +10,11 @@ export default function LoginPage() {
   } = useForm();
 
   const { login } = useAuth();
+  const navigate = useNavigate();
 
-  function onSubmit(data) {
-    login(data.email, data.password);
+  async function onSubmit(data) {
+    await login(data.email, data.password);
+    navigate("/");
   }
 
   return (

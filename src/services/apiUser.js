@@ -91,6 +91,7 @@ export const createUser = async (userData, token) => {
  */
 export const updateUser = async (id, userData) => {
   try {
+    console.log("apiUser", id, userData);
     const response = await fetch(`${API_BASE_URL}/users/${id}`, {
       method: "PUT",
       headers: {
@@ -195,4 +196,20 @@ export const getCurrentUser = async (token) => {
     console.error("[getCurrentUser] Error occurred:", error.message);
     throw error;
   }
+};
+
+// src/services/apiUser.js
+export const promoteUserToAgent = async (id) => {
+  const res = await fetch(`${API_BASE_URL}/users/${id}/role?role=AGENT`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to promote user");
+  }
+
+  return await res.json();
 };

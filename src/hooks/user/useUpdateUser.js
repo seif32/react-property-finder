@@ -5,7 +5,7 @@ export const useUpdateUser = (options = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, userData }) => updateUser(id, userData),
+    mutationFn: ({ userId, userData }) => updateUser(userId, userData),
     onSuccess: (data, variables, context) => {
       // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ["users"] });

@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { currentUser } from "../data/dummyData";
+import { useGetPropertyImages } from "../hooks/property-image/useGetPropertyImages";
+import LoadingSpinner from "./LoadingSpinner";
 
 function PropertyCard({ property }) {
   const [isBookmarked, setIsBookmarked] = useState(
     currentUser.bookmarks.includes(property.id)
   );
+
+  const { data: images, isLoading } = useGetPropertyImages(property.id);
+
+  if (isLoading) return <LoadingSpinner />;
+
+  const primaryImage = images.find((img) => img.isPrimary) || images[0];
 
   const handleBookmarkToggle = (e) => {
     e.preventDefault();
@@ -30,10 +38,11 @@ function PropertyCard({ property }) {
     <div className="h-full bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
       <div className="relative">
         <img
-          src={property.images[0].imageUrl || "/placeholder.svg"}
-          alt={property.title}
+          src={primaryImage?.imageUrl || "/placeholder.svg"}
+          alt={primaryImage?.description || "Property image"}
           className="h-48 w-full object-cover"
         />
+
         <button
           onClick={handleBookmarkToggle}
           className="absolute top-2 right-2 p-2 bg-white/80 hover:bg-white rounded-full shadow-md transition-colors"
