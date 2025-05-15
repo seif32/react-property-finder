@@ -4,33 +4,19 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { currentUser, properties } from "../data/dummyData";
 import PropertyCard from "../components/PropertyCard";
+import { useAuth } from "../auth/AuthContext";
+import { useGetUserBookmarks } from "../hooks/bookmark/useGetUserBookmarks";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 function BookmarksPage() {
-  const [bookmarkedProperties, setBookmarkedProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth(); // assume this gives you { id, ... }
 
-  useEffect(() => {
-    // Simulate API call to fetch bookmarked properties
-    const fetchBookmarkedProperties = () => {
-      setLoading(true);
-      setTimeout(() => {
-        const bookmarked = properties.filter((property) =>
-          currentUser.bookmarks.includes(property.id)
-        );
-        setBookmarkedProperties(bookmarked);
-        setLoading(false);
-      }, 500);
-    };
+  const { data: bookmarkedProperties = [], isLoading } = useGetUserBookmarks(
+    user?.id
+  );
 
-    fetchBookmarkedProperties();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold">Loading your bookmarks...</h1>
-      </div>
-    );
+  if (isLoading) {
+    return <LoadingSpinner />;
   }
 
   return (
@@ -43,7 +29,10 @@ function BookmarksPage() {
       {bookmarkedProperties.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {bookmarkedProperties.map((property) => (
-            <PropertyCard key={property.id} property={property} />
+            <PropertyCard
+              key={property.property.id}
+              property={property.property}
+            />
           ))}
         </div>
       ) : (

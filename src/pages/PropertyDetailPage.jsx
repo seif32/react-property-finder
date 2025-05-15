@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import PropertyImageGallery from "../components/PropertyImageGallery";
 import PropertyReviews from "../components/PropertyReviews";
@@ -9,16 +7,21 @@ import { useGetPropertyById } from "../hooks/property/useGetPropertyById";
 import { useGetAllProperties } from "../hooks/property/useGetAllProperties";
 import { useGetPropertyImages } from "../hooks/property-image/useGetPropertyImages";
 import { useGetPropertyReviews } from "../hooks/review/useGetPropertyReviews";
+import { useCreateBookmark } from "../hooks/bookmark/useCreateBookmark";
+import { useDeleteBookmark } from "../hooks/bookmark/useDeleteBookmark";
+import { useAuth } from "../auth/AuthContext";
+import { useCheckBookmark } from "../hooks/bookmark/useCheckBookmark";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useDeleteBookmarkByUserAndProperty } from "../hooks/bookmark/useDeleteBookmarkByUserAndProperty";
 
 function PropertyDetailPage() {
   const { id } = useParams();
   const { data: properties, isLoading } = useGetAllProperties();
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const {
-    data: property,
-    isLoading: loading,
-    isError,
-  } = useGetPropertyById(id);
+
+  const { user } = useAuth();
+
+  const { data: property, isLoading: loading } = useGetPropertyById(id);
 
   const { data: images = [], isLoading: loadingImages } =
     useGetPropertyImages(id);
@@ -26,11 +29,42 @@ function PropertyDetailPage() {
   const { data: reviews = [], isLoading: loadingReviews } =
     useGetPropertyReviews(id);
 
+  const { data: isBookmarkedFromApi, isLoading: loadingBookmarkStatus } =
+    useCheckBookmark(user?.id, Number(id));
+
+  useEffect(() => {
+    if (typeof isBookmarkedFromApi === "boolean") {
+      setIsBookmarked(isBookmarkedFromApi);
+    }
+  }, [isBookmarkedFromApi]);
+
+  const { mutate: createBookmark, isLoading: creating } = useCreateBookmark({
+    onSuccess: () => {
+      setIsBookmarked(true);
+    },
+  });
+
+  const { mutate: deleteBookmarkMutation, isLoading: deleting } =
+    useDeleteBookmarkByUserAndProperty({
+      onSuccess: () => {
+        setIsBookmarked(false);
+      },
+    });
+
   const handleBookmarkToggle = () => {
-    setIsBookmarked(!isBookmarked);
-    console.log(
-      `Property ${id} ${!isBookmarked ? "bookmarked" : "unbookmarked"}`
-    );
+    const payload = {
+      userId: user.id,
+      propertyId: Number(id),
+    };
+
+    if (isBookmarked) {
+      deleteBookmarkMutation(payload);
+    } else {
+      createBookmark({
+        ...payload,
+        createdAt: new Date().toISOString(),
+      });
+    }
   };
 
   const handleShare = () => {
@@ -39,15 +73,14 @@ function PropertyDetailPage() {
     alert("Share functionality would be implemented here");
   };
 
-  if (loading || isLoading || loadingImages || loadingReviews) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900" />
-        <h2 className="text-xl font-medium mt-4">
-          Loading property details...
-        </h2>
-      </div>
-    );
+  if (
+    loading ||
+    isLoading ||
+    loadingImages ||
+    loadingReviews ||
+    loadingBookmarkStatus
+  ) {
+    return <LoadingSpinner message="Loading Property Details . . ." />;
   }
 
   if (!property) {
@@ -161,11 +194,12 @@ function PropertyDetailPage() {
         <div className="flex mt-4 sm:mt-0">
           <button
             onClick={handleBookmarkToggle}
+            disabled={creating || deleting}
             className={`p-2 rounded-full ${
               isBookmarked
                 ? "text-red-500 hover:bg-red-50"
                 : "text-gray-500 hover:bg-gray-100"
-            } transition-colors`}
+            } transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
             aria-label={
               isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"
             }
@@ -200,6 +234,7 @@ function PropertyDetailPage() {
               </svg>
             )}
           </button>
+
           <button
             onClick={handleShare}
             className="p-2 text-gray-500 rounded-full hover:bg-gray-100 transition-colors ml-2"

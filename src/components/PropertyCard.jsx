@@ -3,15 +3,24 @@ import { Link } from "react-router-dom";
 import { currentUser } from "../data/dummyData";
 import { useGetPropertyImages } from "../hooks/property-image/useGetPropertyImages";
 import LoadingSpinner from "./LoadingSpinner";
+import { useAuth } from "../auth/AuthContext";
+import { useCheckBookmark } from "../hooks/bookmark/useCheckBookmark";
+import { useCreateBookmark } from "../hooks/bookmark/useCreateBookmark";
+import { useDeleteBookmarkByUserAndProperty } from "../hooks/bookmark/useDeleteBookmarkByUserAndProperty";
 
 function PropertyCard({ property }) {
-  const [isBookmarked, setIsBookmarked] = useState(
-    currentUser.bookmarks.includes(property.id)
-  );
+  const { user } = useAuth(); // assumes user has an `id`
+
+  const { data: isBookmarked = false, isLoading: loadingBookmarkCheck } =
+    useCheckBookmark(user?.id, property.id);
+
+  const { mutate: createBookmark, isLoading: creating } = useCreateBookmark();
+  const { mutate: deleteBookmark, isLoading: deleting } =
+    useDeleteBookmarkByUserAndProperty();
 
   const { data: images, isLoading } = useGetPropertyImages(property.id);
 
-  if (isLoading) return <LoadingSpinner />;
+  if (loadingBookmarkCheck || isLoading) return <LoadingSpinner />;
 
   const primaryImage = images.find((img) => img.isPrimary) || images[0];
 
@@ -19,12 +28,17 @@ function PropertyCard({ property }) {
     e.preventDefault();
     e.stopPropagation();
 
-    setIsBookmarked(!isBookmarked);
-    console.log(
-      `Property ${property.id} ${!isBookmarked ? "bookmarked" : "unbookmarked"}`
-    );
+    const payload = {
+      userId: user.id,
+      propertyId: property.id,
+      createdAt: new Date().toISOString(),
+    };
 
-    // In a real app, you would call the API to add/remove bookmark
+    if (isBookmarked) {
+      deleteBookmark({ userId: user.id, propertyId: property.id });
+    } else {
+      createBookmark(payload);
+    }
   };
 
   const formatPrice = (price) =>
@@ -45,7 +59,8 @@ function PropertyCard({ property }) {
 
         <button
           onClick={handleBookmarkToggle}
-          className="absolute top-2 right-2 p-2 bg-white/80 hover:bg-white rounded-full shadow-md transition-colors"
+          disabled={creating || deleting}
+          className="absolute top-2 right-2 p-2 bg-white/80 hover:bg-white rounded-full shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label={
             isBookmarked ? "Remove from bookmarks" : "Add to bookmarks"
           }
@@ -80,6 +95,7 @@ function PropertyCard({ property }) {
             </svg>
           )}
         </button>
+
         <span
           className={`absolute top-2 left-2 text-xs font-bold px-2 py-1 rounded-md ${
             property.listingType === "Sale"

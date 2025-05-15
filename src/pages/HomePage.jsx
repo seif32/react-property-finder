@@ -22,7 +22,7 @@ function HomePage() {
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-black/60 z-10" />
           <img
-            src="/public/abstract-geometric-shapes.png"
+            src="https://cdn.pixabay.com/photo/2023/12/04/01/23/kitchen-8428467_1280.jpg"
             alt="Luxury Property"
             className="w-full h-full object-cover"
           />
@@ -36,10 +36,6 @@ function HomePage() {
             Discover the perfect property that matches your lifestyle and
             preferences
           </p>
-
-          <div className="max-w-4xl mx-auto mt-8">
-            <PropertySearchForm compact={true} />
-          </div>
         </div>
       </div>
 
@@ -171,6 +167,10 @@ function HomePage() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto mt-8">
+        <PropertySearchForm compact={true} />
       </div>
 
       {/* Popular Locations Section */}
