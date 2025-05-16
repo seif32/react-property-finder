@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { useGetAllLocations } from "../hooks/location/useGetAllLocations";
 import LocationCard from "../components/LocationCard";
