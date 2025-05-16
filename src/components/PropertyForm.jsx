@@ -1,12 +1,14 @@
-"use client";
-
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { listingTypes, locations, propertyTypes } from "../data/dummyData";
+import { listingTypes, propertyTypes } from "../data/dummyData";
+import { useGetAllLocations } from "../hooks/location/useGetAllLocations";
+import LoadingSpinner from "./LoadingSpinner";
 
 function PropertyForm({ property = null, onSubmit }) {
   const navigate = useNavigate();
   const isEditing = !!property;
+
+  const { data: locations, isLoading } = useGetAllLocations();
 
   const {
     register,
@@ -37,6 +39,7 @@ function PropertyForm({ property = null, onSubmit }) {
           listingType: "",
         },
   });
+  if (isLoading) return <LoadingSpinner />;
 
   const handleFormSubmit = (data) => {
     console.log("Property form submitted:", data);

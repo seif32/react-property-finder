@@ -20,6 +20,8 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const token = await firebaseUser.getIdToken();
+        localStorage.setItem("authToken", token); // 👈 Keep localStorage in sync
+
         try {
           const data = await getCurrentUser(token);
           setUser({ ...data, token });
@@ -54,6 +56,8 @@ export function AuthProvider({ children }) {
     );
 
     setUser({ ...userData, token });
+    localStorage.setItem("authToken", token);
+
     return userData;
   };
 
@@ -68,12 +72,16 @@ export function AuthProvider({ children }) {
     const userData = await getCurrentUser(token); // ✅
 
     setUser({ ...userData, token });
+
+    localStorage.setItem("authToken", token);
+
     return userData;
   };
 
   const signOut = async () => {
     await firebaseSignOut(auth);
     setUser(null);
+    localStorage.removeItem("authToken"); // 👈 Remove token on logout
   };
 
   return (

@@ -114,10 +114,12 @@ export const getPropertiesByOwner = async (ownerId) => {
  */
 export const createProperty = async (propertyData) => {
   try {
+    const token = localStorage.getItem("authToken");
     const response = await fetch(`${API_BASE_URL}/properties`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(propertyData),
     });
@@ -141,10 +143,13 @@ export const createProperty = async (propertyData) => {
  */
 export const updateProperty = async (id, propertyData) => {
   try {
+    const token = localStorage.getItem("authToken");
+
     const response = await fetch(`${API_BASE_URL}/properties/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(propertyData),
     });
@@ -165,23 +170,43 @@ export const updateProperty = async (id, propertyData) => {
  * Delete a property
  * @param {number} id - Property ID
  */
+
 export const deleteProperty = async (id) => {
   try {
+    const token = localStorage.getItem("authToken");
     const response = await fetch(`${API_BASE_URL}/properties/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
+    // Try to parse response body as JSON (if any)
+    let errorBody = null;
+    try {
+      errorBody = await response.json();
+    } catch (jsonErr) {
+      // If the body isn't JSON, just ignore
+    }
+
     if (!response.ok) {
+      const errorMessage =
+        errorBody?.message || errorBody?.error || "Unknown error";
+
       throw new Error(
-        response.status === 404
-          ? "Property not found"
-          : ERROR_MESSAGES.SERVER_ERROR
+        `Failed to delete property ${id}: ${response.status} ${response.statusText} - ${errorMessage}`
       );
     }
 
-    return true; // Successfully deleted
-  } catch (error) {
-    console.error(`Error deleting property ${id}:`, error);
-    throw error.message || ERROR_MESSAGES.DEFAULT;
+    return true; // success
+  } catch (err) {
+    // Log detailed error
+    console.error("deleteProperty error:", {
+      id,
+      message: err.message,
+      stack: err.stack,
+    });
+
+    throw err; // re-throw for React Query or caller to handle
   }
 };

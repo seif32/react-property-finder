@@ -126,3 +126,18 @@ Update status of a viewing request (`PENDING`, `APPROVED`, `DECLINED`)
   "status": "APPROVED"
 }
 ```
+
+## ✅ **All API Endpoints That Require a Firebase Token**
+
+| HTTP Method | Endpoint               | Reason for Token Requirement                      |
+| ----------- | ---------------------- | ------------------------------------------------- |
+| `POST`      | `/api/properties`      | Create property (must be tied to a user)          |
+| `PUT`       | `/api/properties/{id}` | Update property (owner/admin only)                |
+| `DELETE`    | `/api/properties/{id}` | Delete property (owner/admin only)                |
+| `POST`      | `/api/reviews`         | Create review (user-specific)                     |
+| `PUT`       | `/api/reviews/{id}`    | Update review (only by author)                    |
+| `DELETE`    | `/api/reviews/{id}`    | Delete review (author or property owner)          |
+| `GET`       | `/api/users/me`        | Fetch current user info (based on Firebase email) |
+| `POST`      | `/api/users`           | Register new user in backend                      |
+
+---

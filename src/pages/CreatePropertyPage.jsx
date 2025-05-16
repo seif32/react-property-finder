@@ -2,24 +2,24 @@
 
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { currentUser } from "../data/dummyData";
 import PropertyForm from "../components/PropertyForm";
+import { useAuth } from "../auth/AuthContext";
+import { useCreateProperty } from "../hooks/property/useCreateProperty";
 
 function CreatePropertyPage() {
   const navigate = useNavigate();
 
+  const { user } = useAuth();
+  const { mutate: createProperty, isPending } = useCreateProperty();
+
   const handleSubmit = (data) => {
-    // Add owner information to the data
     const propertyData = {
       ...data,
-      ownerId: currentUser.id,
-      ownerName: `${currentUser.firstName} ${currentUser.lastName}`,
+      ownerId: user.id,
+      ownerName: `${user.firstName} ${user.lastName}`,
     };
 
-    console.log("POST /api/properties with data:", propertyData);
-
-    // In a real app, you would make an API call here
-    alert("Property created successfully!");
+    createProperty(propertyData);
     navigate("/my-properties");
   };
 

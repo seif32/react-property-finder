@@ -4,46 +4,32 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { properties } from "../data/dummyData";
 import PropertyForm from "../components/PropertyForm";
+import { useGetPropertyById } from "../hooks/property/useGetPropertyById";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useUpdateProperty } from "../hooks/property/useUpdateProperty";
 
 function EditPropertyPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [property, setProperty] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Simulate API call to fetch property details
-    const fetchProperty = () => {
-      setLoading(true);
-      setTimeout(() => {
-        const foundProperty = properties.find(
-          (p) => p.id === Number.parseInt(id)
-        );
-        setProperty(foundProperty || null);
-        setLoading(false);
-      }, 500);
-    };
+  const { data: property, isLoading, isError } = useGetPropertyById(id);
 
-    fetchProperty();
-  }, [id]);
+  const updateMutation = useUpdateProperty({
+    onSuccess: () => {
+      navigate(`/properties/${id}`);
+    },
+    onError: (err) => {
+      console.error("Update failed:", err);
+      alert("Failed to update property.");
+    },
+  });
 
   const handleSubmit = (data) => {
-    console.log(`PUT /api/properties/${id} with data:`, data);
-
-    // In a real app, you would make an API call here
-    alert("Property updated successfully!");
-    navigate(`/properties/${id}`);
+    updateMutation.mutate({ id, propertyData: data });
   };
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900" />
-        <h2 className="text-xl font-medium mt-4">
-          Loading property details...
-        </h2>
-      </div>
-    );
+  if (isLoading) {
+    return <LoadingSpinner />;
   }
 
   if (!property) {

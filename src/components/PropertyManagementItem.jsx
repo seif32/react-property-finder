@@ -1,12 +1,18 @@
-"use client";
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingSpinner from "./LoadingSpinner";
+import { useGetPrimaryImage } from "../hooks/property-image/useGetPrimaryImage";
+import { useDeleteProperty } from "../hooks/property/useDeleteProperty";
 
 function PropertyManagementItem({ property }) {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  const { data: image, isLoading } = useGetPrimaryImage(property.id);
+  const { mutate: deleteProperty, isPending } = useDeleteProperty();
+
+  if (isLoading) return <LoadingSpinner />;
 
   const handleMenuToggle = () => {
     setMenuOpen(!menuOpen);
@@ -28,7 +34,7 @@ function PropertyManagementItem({ property }) {
   };
 
   const handleDeleteClick = () => {
-    setDeleteDialogOpen(true);
+    deleteProperty(property.id);
     setMenuOpen(false);
   };
 
@@ -52,11 +58,11 @@ function PropertyManagementItem({ property }) {
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-4 flex flex-col sm:flex-row">
+      <div className="bg-white rounded-lg shadow-sm  mb-4 flex flex-col sm:flex-row">
         {/* Property Image */}
         <div className="w-full sm:w-48 h-48 sm:h-auto flex-shrink-0">
           <img
-            src={property.images[0]?.imageUrl || "/placeholder.svg"}
+            src={image?.imageUrl}
             alt={property.title}
             className="w-full h-full object-cover"
           />

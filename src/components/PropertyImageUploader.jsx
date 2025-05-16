@@ -1,20 +1,51 @@
 "use client";
 
 import { useState } from "react";
+import { useAddPropertyImage } from "../hooks/property-image/useAddPropertyImage";
+import { useUpdatePropertyImage } from "../hooks/property-image/useUpdatePropertyImage";
+import { useDeletePropertyImage } from "../hooks/property-image/useDeletePropertyImage";
 
-function PropertyImageUploader({ propertyId, initialImages = [] }) {
-  const [images, setImages] = useState(initialImages);
+// MUI Components
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
+import InputAdornment from "@mui/material/InputAdornment";
+import Paper from "@mui/material/Paper";
+import Divider from "@mui/material/Divider";
+import { useGetPropertyImages } from "../hooks/property-image/useGetPropertyImages";
+import LoadingSpinner from "./LoadingSpinner";
+
+function PropertyImageUploader({ propertyId }) {
   const [openDialog, setOpenDialog] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
   const [description, setDescription] = useState("");
   const [isPrimary, setIsPrimary] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  const { addImage, isPending: isAdding } = useAddPropertyImage(propertyId);
+  const updateImage = useUpdatePropertyImage(propertyId);
+  const deleteImage = useDeletePropertyImage(propertyId);
+
+  const { data: images, isLoading } = useGetPropertyImages(propertyId);
+
+  if (isLoading) return <LoadingSpinner />;
 
   const handleAddImage = () => {
     setCurrentImage(null);
     setImageUrl("");
     setDescription("");
     setIsPrimary(false);
+    setImageError(false);
     setOpenDialog(true);
   };
 
@@ -23,6 +54,7 @@ function PropertyImageUploader({ propertyId, initialImages = [] }) {
     setImageUrl(image.imageUrl);
     setDescription(image.description);
     setIsPrimary(image.isPrimary);
+    setImageError(false);
     setOpenDialog(true);
   };
 
@@ -33,67 +65,37 @@ function PropertyImageUploader({ propertyId, initialImages = [] }) {
   const handleSaveImage = () => {
     if (!imageUrl) return;
 
+    const imagePayload = {
+      propertyId,
+      imageUrl,
+      description,
+      isPrimary,
+    };
+
     if (currentImage) {
-      // Edit existing image
-      console.log(`PUT /api/property-images/${currentImage.id} with data:`, {
-        imageUrl,
-        description,
-        isPrimary,
+      // Update
+      updateImage.mutate({
+        imageId: currentImage.id,
+        imageData: imagePayload,
       });
-
-      const updatedImages = images.map((img) => {
-        if (img.id === currentImage.id) {
-          return { ...img, imageUrl, description, isPrimary };
-        }
-        // If this image is set as primary, make sure other images are not primary
-        return isPrimary ? { ...img, isPrimary: false } : img;
-      });
-
-      setImages(updatedImages);
     } else {
-      // Add new image
-      console.log(`POST /api/property-images with data:`, {
-        propertyId,
-        imageUrl,
-        description,
-        isPrimary,
-      });
-
-      const newImage = {
-        id: Date.now(), // Temporary ID for dummy data
-        propertyId,
-        imageUrl,
-        description,
-        isPrimary,
-      };
-
-      // If new image is primary, update other images
-      const updatedImages = isPrimary
-        ? images.map((img) => ({ ...img, isPrimary: false }))
-        : [...images];
-
-      setImages([...updatedImages, newImage]);
+      // Add
+      addImage(imagePayload);
     }
 
     setOpenDialog(false);
   };
 
   const handleDeleteImage = (imageId) => {
-    if (window.confirm("Are you sure you want to delete this image?")) {
-      console.log(`DELETE /api/property-images/${imageId}`);
-      setImages(images.filter((img) => img.id !== imageId));
-    }
+    deleteImage.mutate(imageId);
   };
 
   const handleSetPrimary = (imageId) => {
     console.log(`PUT /api/property-images/${imageId}/set-primary`);
+  };
 
-    setImages(
-      images.map((img) => ({
-        ...img,
-        isPrimary: img.id === imageId,
-      }))
-    );
+  const handleImageError = () => {
+    setImageError(true);
   };
 
   return (
@@ -222,132 +224,249 @@ function PropertyImageUploader({ propertyId, initialImages = [] }) {
         )}
       </div>
 
-      {/* Image Add/Edit Dialog */}
-      {openDialog && (
-        <div
-          className="fixed inset-0 z-50 overflow-y-auto"
-          aria-labelledby="modal-title"
-          role="dialog"
-          aria-modal="true"
+      {/* MUI Dialog */}
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          elevation: 8,
+          sx: {
+            borderRadius: 2,
+            overflow: "hidden",
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            borderBottom: "1px solid #e0e0e0",
+            pb: 1,
+          }}
         >
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            {/* Background overlay */}
-            <div
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-              aria-hidden="true"
-              onClick={handleCloseDialog}
+          <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+            {currentImage ? "Edit Image" : "Add New Image"}
+          </Typography>
+          <IconButton
+            edge="end"
+            color="inherit"
+            onClick={handleCloseDialog}
+            aria-label="close"
+            size="small"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18 6L6 18M6 6L18 18"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent sx={{ pt: 3 }}>
+          {/* Image Preview */}
+          <Box
+            sx={{
+              width: "100%",
+              height: 200,
+              mb: 3,
+              border: "1px solid #e0e0e0",
+              borderRadius: 1,
+              overflow: "hidden",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "#f5f5f5",
+            }}
+          >
+            {imageUrl && !imageError ? (
+              <img
+                src={imageUrl || "/placeholder.svg"}
+                alt="Preview"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+                onError={handleImageError}
+              />
+            ) : (
+              <Box sx={{ textAlign: "center", p: 2 }}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="48"
+                  height="48"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#9e9e9e"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ margin: "0 auto", marginBottom: 8 }}
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+                <Typography variant="body2" color="text.secondary">
+                  {imageError
+                    ? "Image failed to load"
+                    : "Image preview will appear here"}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
+          {/* Form Fields */}
+          <TextField
+            fullWidth
+            label="Image URL"
+            variant="outlined"
+            value={imageUrl}
+            onChange={(e) => {
+              setImageUrl(e.target.value);
+              setImageError(false);
+            }}
+            placeholder="https://example.com/image.jpg"
+            margin="normal"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                    />
+                  </svg>
+                </InputAdornment>
+              ),
+            }}
+            helperText="Enter a valid image URL (JPG, PNG, WebP)"
+          />
+
+          <TextField
+            fullWidth
+            label="Description"
+            variant="outlined"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Front view, Living room, etc."
+            margin="normal"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                    />
+                  </svg>
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <Paper
+            variant="outlined"
+            sx={{
+              mt: 2,
+              p: 2,
+              bgcolor: "#f8f9fa",
+              borderRadius: 1,
+            }}
+          >
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isPrimary}
+                  onChange={(e) => setIsPrimary(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    Set as primary image
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    This image will be displayed as the main property image
+                  </Typography>
+                </Box>
+              }
             />
+          </Paper>
+        </DialogContent>
 
-            {/* Modal panel */}
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <h3
-                  className="text-lg font-medium text-gray-900 mb-4"
-                  id="modal-title"
-                >
-                  {currentImage ? "Edit Image" : "Add New Image"}
-                </h3>
+        <Divider />
 
-                <div className="space-y-4">
-                  <div>
-                    <label
-                      htmlFor="imageUrl"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Image URL
-                    </label>
-                    <input
-                      type="text"
-                      id="imageUrl"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                      placeholder="https://example.com/image.jpg"
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Enter a valid image URL
-                    </p>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="description"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Description
-                    </label>
-                    <input
-                      type="text"
-                      id="description"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Image description"
-                    />
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id="isPrimary"
-                      className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
-                      checked={isPrimary}
-                      onChange={(e) => setIsPrimary(e.target.checked)}
-                    />
-                    <label
-                      htmlFor="isPrimary"
-                      className="ml-2 block text-sm text-gray-700"
-                    >
-                      Set as primary image
-                    </label>
-                  </div>
-
-                  {imageUrl && (
-                    <div className="mt-4">
-                      <p className="text-sm font-medium text-gray-700 mb-2">
-                        Preview:
-                      </p>
-                      <div className="w-full h-48 rounded-lg overflow-hidden bg-gray-100">
-                        <img
-                          src={imageUrl || "/placeholder.svg"}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = "/placeholder.svg";
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="button"
-                  onClick={handleSaveImage}
-                  disabled={!imageUrl}
-                  className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 ${
-                    !imageUrl
-                      ? "bg-gray-300 text-gray-500"
-                      : "bg-black text-white hover:bg-gray-800"
-                  } text-base font-medium sm:ml-3 sm:w-auto sm:text-sm transition-colors`}
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCloseDialog}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+        <DialogActions sx={{ px: 3, py: 2, bgcolor: "#f8f9fa" }}>
+          <Button
+            onClick={handleCloseDialog}
+            variant="outlined"
+            sx={{
+              borderColor: "#e0e0e0",
+              color: "#616161",
+              "&:hover": {
+                borderColor: "#bdbdbd",
+                bgcolor: "#f5f5f5",
+              },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSaveImage}
+            disabled={!imageUrl}
+            variant="contained"
+            sx={{
+              bgcolor: "black",
+              color: "white",
+              "&:hover": {
+                bgcolor: "#333",
+              },
+              "&.Mui-disabled": {
+                bgcolor: "#e0e0e0",
+                color: "#9e9e9e",
+              },
+            }}
+            startIcon={
+              isAdding ? <CircularProgress size={20} color="inherit" /> : null
+            }
+          >
+            {isAdding
+              ? "Saving..."
+              : currentImage
+                ? "Update Image"
+                : "Add Image"}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

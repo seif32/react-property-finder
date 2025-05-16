@@ -1,16 +1,21 @@
 "use client";
-
-import { useState } from "react";
 import { Link } from "react-router-dom";
-import { locations, properties } from "../data/dummyData";
 import PropertySearchForm from "../components/PropertySearchForm";
 import PropertyCard from "../components/PropertyCard";
 import { useGetAllProperties } from "../hooks/property/useGetAllProperties";
 import LoadingSpinner from "../components/LoadingSpinner";
+import {
+  MapPinIcon,
+  BuildingOffice2Icon,
+  ArrowRightIcon,
+} from "@heroicons/react/24/outline";
+import { useGetAllLocations } from "../hooks/location/useGetAllLocations";
 
 function HomePage() {
   const { data: properties, isLoading } = useGetAllProperties();
-  if (isLoading) return <LoadingSpinner />;
+  const { data: locations, isLoading: isLocationLoading } =
+    useGetAllLocations();
+  if (isLoading || isLocationLoading) return <LoadingSpinner />;
 
   const featuredProperties = properties.slice(0, 3);
 
@@ -184,40 +189,143 @@ function HomePage() {
           </p>
         </div>
 
+        {/* Enhanced Locations Grid - Modern Design without Images */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {locations.slice(0, 4).map((location) => (
-            <div
-              key={location.id}
-              className="relative h-48 rounded-xl overflow-hidden group"
-            >
-              <img
-                src={`/abstract-geometric-shapes.png?height=400&width=300&query=${location.name} city skyline`}
-                alt={location.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-              <div className="absolute bottom-0 left-0 p-4 text-white">
-                <h3 className="text-xl font-bold">{location.name}</h3>
-                <div className="flex items-center mt-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                      clipRule="evenodd"
+          {locations.slice(0, 4).map((location, index) => {
+            // Generate unique colors for each location
+            const colors = [
+              [
+                "from-gray-700 to-gray-900", // gradient text or background
+                "bg-gray-700/10", // soft background tint
+                "border-gray-700/20", // subtle border
+              ],
+              [
+                "from-gray-800 to-black",
+                "bg-gray-800/10",
+                "border-gray-800/20",
+              ],
+              ["from-black to-gray-800", "bg-black/10", "border-black/20"],
+              [
+                "from-gray-900 to-gray-700",
+                "bg-gray-900/10",
+                "border-gray-900/20",
+              ],
+            ];
+
+            const [gradientColor, bgColor, borderColor] =
+              colors[index % colors.length];
+
+            return (
+              <Link
+                key={location.id}
+                to={`/properties?location=${location.name}`}
+                className="group block"
+              >
+                <div
+                  className={`relative h-64 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 group-hover:shadow-xl ${bgColor} border border-dashed ${borderColor}`}
+                >
+                  {/* Abstract background pattern */}
+                  <div className="absolute inset-0 opacity-20">
+                    <svg
+                      className="w-full h-full"
+                      viewBox="0 0 100 100"
+                      preserveAspectRatio="none"
+                    >
+                      <defs>
+                        <linearGradient
+                          id={`gradient-${location.id}`}
+                          x1="0%"
+                          y1="0%"
+                          x2="100%"
+                          y2="100%"
+                        >
+                          <stop
+                            offset="0%"
+                            className={`${gradientColor.split(" ")[0]}`}
+                          />
+                          <stop
+                            offset="100%"
+                            className={`${gradientColor.split(" ")[1]}`}
+                          />
+                        </linearGradient>
+                        <pattern
+                          id={`pattern-${location.id}`}
+                          width="10"
+                          height="10"
+                          patternUnits="userSpaceOnUse"
+                        >
+                          <circle
+                            cx="5"
+                            cy="5"
+                            r="1.5"
+                            fill={`url(#gradient-${location.id})`}
+                          />
+                        </pattern>
+                      </defs>
+                      <rect
+                        width="100%"
+                        height="100%"
+                        fill={`url(#pattern-${location.id})`}
+                      />
+                    </svg>
+                  </div>
+
+                  {/* Animated gradient border */}
+                  <div className="absolute inset-0 rounded-2xl p-[1px] overflow-hidden">
+                    <div
+                      className={`absolute -inset-[10%] bg-gradient-to-r ${gradientColor} opacity-30 blur-xl group-hover:opacity-50 transition-opacity duration-500`}
                     />
-                  </svg>
-                  <span className="ml-1 text-sm">
-                    {location.subLocations.length} areas
-                  </span>
+                  </div>
+
+                  {/* Decorative elements */}
+                  <div className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <MapPinIcon
+                      className={`h-6 w-6 text-gradient-to-r ${gradientColor}`}
+                    />
+                  </div>
+
+                  {/* Large decorative letter */}
+                  <div className="absolute -right-6 -bottom-6 text-[120px] font-black opacity-10 select-none">
+                    {location.name.charAt(0)}
+                  </div>
+
+                  {/* Content */}
+                  <div className="absolute inset-0 flex flex-col justify-end p-6">
+                    <div className="transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                      <h3 className="text-2xl font-bold mb-2 text-gray-900">
+                        {location.name}
+                      </h3>
+
+                      <div className="flex items-center mb-3 text-gray-700">
+                        <MapPinIcon className="h-5 w-5 mr-2" />
+                        <span className="text-sm font-medium">
+                          {location.type}
+                        </span>
+                      </div>
+
+                      {/* <div className="flex items-center text-gray-700">
+                        <BuildingOffice2Icon className="h-5 w-5 mr-2" />
+                        <span className="text-sm font-medium">
+                          {location.subLocations.length}{" "}
+                          {location.subLocations.length === 1
+                            ? "area"
+                            : "areas"}
+                        </span>
+                      </div> */}
+
+                      {/* Explore button */}
+                      <div
+                        className={`mt-4 inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r ${gradientColor} text-white opacity-90 group-hover:opacity-100 transition-all duration-300 group-hover:scale-105 transform-gpu`}
+                      >
+                        Explore properties
+                        <ArrowRightIcon className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform duration-300" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
 

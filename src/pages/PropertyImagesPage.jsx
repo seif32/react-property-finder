@@ -4,29 +4,25 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { properties } from "../data/dummyData";
 import PropertyImageUploader from "../components/PropertyImageUploader";
+import { useGetPropertyById } from "../hooks/property/useGetPropertyById";
+import { useGetPropertyImages } from "../hooks/property-image/useGetPropertyImages";
 
 function PropertyImagesPage() {
   const { id } = useParams();
-  const [property, setProperty] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Simulate API call to fetch property details
-    const fetchProperty = () => {
-      setLoading(true);
-      setTimeout(() => {
-        const foundProperty = properties.find(
-          (p) => p.id === Number.parseInt(id)
-        );
-        setProperty(foundProperty || null);
-        setLoading(false);
-      }, 500);
-    };
+  const {
+    data: property,
+    isLoading: isLoadingProperty,
+    isError: isPropertyError,
+  } = useGetPropertyById(id);
 
-    fetchProperty();
-  }, [id]);
+  const {
+    data: images,
+    isLoading: isLoadingImages,
+    isError: isImageError,
+  } = useGetPropertyImages(id);
 
-  if (loading) {
+  if (isLoadingProperty || isLoadingImages) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900" />
@@ -37,7 +33,7 @@ function PropertyImagesPage() {
     );
   }
 
-  if (!property) {
+  if (!property || !images) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h2 className="text-2xl font-bold mb-4">Property not found</h2>
@@ -143,7 +139,7 @@ function PropertyImagesPage() {
       <div className="bg-white rounded-lg shadow-sm p-6 mt-6">
         <PropertyImageUploader
           propertyId={property.id}
-          initialImages={property.images}
+          initialImages={images}
         />
       </div>
     </div>

@@ -1,38 +1,26 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { properties } from "../data/dummyData";
 import PropertyManagementItem from "../components/PropertyManagementItem";
+import { useAuth } from "../auth/AuthContext";
+import { useGetPropertiesByOwner } from "../hooks/property/useGetPropertiesByOwner";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useGetPrimaryImage } from "../hooks/property-image/useGetPrimaryImage";
 
 function MyPropertiesPage() {
-  const [myProperties, setMyProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [tabValue, setTabValue] = useState(0);
 
-  useEffect(() => {
-    // Simulate API call to fetch user's properties
-    const fetchMyProperties = () => {
-      setLoading(true);
-      setTimeout(() => {
-        // In a real app, you would filter by the actual owner ID
-        // For demo purposes, let's assume the current user owns some properties
-        const userProperties = properties.filter(
-          (property) => property.ownerId === 1
-        );
-        setMyProperties(userProperties);
-        setLoading(false);
-      }, 500);
-    };
+  const { user } = useAuth();
 
-    fetchMyProperties();
-  }, []);
+  const { data: myProperties = [], isLoading } = useGetPropertiesByOwner(
+    user.id
+  );
+
+  if (isLoading) return <LoadingSpinner />;
 
   const handleTabChange = (newValue) => {
     setTabValue(newValue);
   };
 
-  // Filter properties based on tab
   const filteredProperties =
     tabValue === 0
       ? myProperties
@@ -68,40 +56,23 @@ function MyPropertiesPage() {
 
       <div className="bg-white rounded-lg shadow-sm mb-6">
         <div className="flex">
-          <button
-            onClick={() => handleTabChange(0)}
-            className={`flex-1 py-3 text-center font-medium ${
-              tabValue === 0
-                ? "text-black border-b-2 border-black"
-                : "text-gray-500 hover:text-gray-700 border-b border-gray-200"
-            }`}
-          >
-            All Properties
-          </button>
-          <button
-            onClick={() => handleTabChange(1)}
-            className={`flex-1 py-3 text-center font-medium ${
-              tabValue === 1
-                ? "text-black border-b-2 border-black"
-                : "text-gray-500 hover:text-gray-700 border-b border-gray-200"
-            }`}
-          >
-            For Sale
-          </button>
-          <button
-            onClick={() => handleTabChange(2)}
-            className={`flex-1 py-3 text-center font-medium ${
-              tabValue === 2
-                ? "text-black border-b-2 border-black"
-                : "text-gray-500 hover:text-gray-700 border-b border-gray-200"
-            }`}
-          >
-            For Rent
-          </button>
+          {["All Properties", "For Sale", "For Rent"].map((label, index) => (
+            <button
+              key={index}
+              onClick={() => handleTabChange(index)}
+              className={`flex-1 py-3 text-center font-medium ${
+                tabValue === index
+                  ? "text-black border-b-2 border-black"
+                  : "text-gray-500 hover:text-gray-700 border-b border-gray-200"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex justify-center py-16">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900" />
         </div>
