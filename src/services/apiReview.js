@@ -132,10 +132,13 @@ export const getRecentReviews = async (limit = 10) => {
  */
 export const createReview = async (reviewData) => {
   try {
+    const token = localStorage.getItem("authToken");
+
     const response = await fetch(`${API_BASE_URL}/reviews`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(reviewData),
     });

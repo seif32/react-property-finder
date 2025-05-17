@@ -12,6 +12,7 @@ function PropertyCard({ property }) {
   const { user } = useAuth();
 
   const isAgent = user.role === "AGENT";
+  const isAdmin = user.role === "ADMIN";
 
   const { data: isBookmarked = false, isLoading: loadingBookmarkCheck } =
     useCheckBookmark(user?.id, property.id);
@@ -59,7 +60,7 @@ function PropertyCard({ property }) {
           className="h-48 w-full object-cover"
         />
 
-        {!isAgent && (
+        {!isAgent && !isAdmin && (
           <button
             onClick={handleBookmarkToggle}
             disabled={creating || deleting}

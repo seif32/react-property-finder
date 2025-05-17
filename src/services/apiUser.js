@@ -91,7 +91,6 @@ export const createUser = async (userData, token) => {
  */
 export const updateUser = async (id, userData) => {
   try {
-    console.log("apiUser", id, userData);
     const response = await fetch(`${API_BASE_URL}/users/${id}`, {
       method: "PUT",
       headers: {

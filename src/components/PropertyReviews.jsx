@@ -8,6 +8,7 @@ function PropertyReviews({ reviews, propertyId }) {
   const [localReviews, setLocalReviews] = useState(reviews);
 
   const { user } = useAuth();
+  const isAgent = user.role === "AGENT";
 
   const {
     register,
@@ -81,12 +82,14 @@ function PropertyReviews({ reviews, propertyId }) {
             </span>
           </div>
         </div>
-        <button
-          onClick={() => setShowReviewForm(!showReviewForm)}
-          className="mt-4 sm:mt-0 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-        >
-          {showReviewForm ? "Cancel" : "Write a Review"}
-        </button>
+        {!isAgent && (
+          <button
+            onClick={() => setShowReviewForm(!showReviewForm)}
+            className="mt-4 sm:mt-0 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            {showReviewForm ? "Cancel" : "Write a Review"}
+          </button>
+        )}
       </div>
 
       {showReviewForm && (

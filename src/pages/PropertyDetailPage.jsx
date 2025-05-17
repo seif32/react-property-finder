@@ -25,6 +25,7 @@ function PropertyDetailPage() {
 
   const { user } = useAuth();
   const isAgent = user.role === "AGENT";
+  const isAdmin = user.role === "ADMIN";
 
   const { data: property, isLoading: loading } = useGetPropertyById(id);
 
@@ -197,7 +198,7 @@ function PropertyDetailPage() {
           </div>
         </div>
         <div className="flex mt-4 sm:mt-0">
-          {!isAgent && (
+          {!isAgent && !isAdmin && (
             <button
               onClick={handleBookmarkToggle}
               disabled={creating || deleting}
@@ -242,7 +243,7 @@ function PropertyDetailPage() {
             </button>
           )}
 
-          <button
+          {/* <button
             onClick={handleShare}
             className="p-2 text-gray-500 rounded-full hover:bg-gray-100 transition-colors ml-2"
             aria-label="Share property"
@@ -255,7 +256,7 @@ function PropertyDetailPage() {
             >
               <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
             </svg>
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -374,15 +375,14 @@ function PropertyDetailPage() {
             >
               {property.listingType === "Sale" ? "For Sale" : "For Rent"}
             </span>
-            <button
-              onClick={handleContactAgent}
-              className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition-colors mb-3"
-            >
-              Contact Agent
-            </button>
-            <button className="w-full border border-black text-black py-2 rounded-lg hover:bg-gray-100 transition-colors">
-              Schedule Viewing
-            </button>
+            {!isAgent && (
+              <button
+                onClick={handleContactAgent}
+                className="w-full border border-black text-black py-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                Contact Agent
+              </button>
+            )}
           </div>
 
           {/* Owner/Agent Card */}
@@ -406,25 +406,33 @@ function PropertyDetailPage() {
             </button>
           </div>
 
-          {/* Location */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-xl shadow-md p-6 transition-transform hover:scale-[1.01]">
+            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 text-black"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 2a6 6 0 00-6 6c0 4.5 6 10 6 10s6-5.5 6-10a6 6 0 00-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z"
+                  clipRule="evenodd"
+                />
+              </svg>
               Location
             </h3>
-            <div className="h-48 bg-gray-200 rounded-lg mb-4 overflow-hidden">
-              <img
-                src={`/placeholder.svg?key=fu12a&height=400&width=600&query=map of ${property.location}`}
-                alt={`Map of ${property.location}`}
-                className="w-full h-full object-cover"
-              />
+
+            <div className="relative h-16 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 rounded-lg mb-4 flex items-center justify-center text-gray-500 text-sm font-medium">
+              📍 {property.location || "Unknown location"}
             </div>
-            <p className="text-sm text-gray-600 mb-3">{property.location}</p>
-            <button
-              className="w-full text-black py-2 hover:underline"
+
+            {/* <button
               onClick={() => console.log("View on map", property.location)}
+              className="block w-full py-2 text-sm font-medium text-black border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
             >
               View on Map
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
